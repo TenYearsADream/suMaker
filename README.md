@@ -1,11 +1,11 @@
 # suMaker
 This project provide a basic framework for building mesh optimization applications.
 
-## ±àÒë
+## ç¼–è¯‘
 
 ```
-git clone --recursive https://github.com/fly2mars/suMaker.git
+git clone https://github.com/fly2mars/suMaker.git
 ```
 
-Ê¹ÓÃCMakeÉú³ÉVS 2015¼°ÒÔÉÏ°æ±¾µÄSolution¡£
-±àÒëÊ±ĞèÒªÖ¸¶¨OpenCVºÍOpenMeshµÄÄ¿Â¼£¬Çë²Î¿¼ÎÒÃÇµÄresearchÖ÷Ò³»òpptÖĞ¸ø³öµÄÁ´½ÓÏÂÔØÕâÁ½¸ö¿â¡£
+ä½¿ç”¨CMakeç”ŸæˆVS 2015åŠä»¥ä¸Šç‰ˆæœ¬çš„Solutionã€‚
+ç¼–è¯‘æ—¶éœ€è¦æŒ‡å®šOpenCVå’ŒOpenMeshçš„ç›®å½•ï¼Œè¯·å‚è€ƒæˆ‘ä»¬çš„researchä¸»é¡µæˆ–pptä¸­ç»™å‡ºçš„é“¾æ¥ä¸‹è½½è¿™ä¸¤ä¸ªåº“ã€‚
