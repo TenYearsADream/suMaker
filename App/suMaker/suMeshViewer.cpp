@@ -22,11 +22,13 @@ suMeshViewer::suMeshViewer() : bMesh_Open(false), bSelect_Mode(false), nDeep_(0)
 {
 	mFEABox = nullptr;
 }
-void suMeshViewer::openMesh(std::string filename)
+void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progress)
 {
+	progress("Read mesh", 0);
 	OpenMesh::IO::read_mesh(mesh_, filename);
+	progress("Read mesh", 100);
 
-	//convert obj from openmen to eigen
+	//convert obj from openmesh to eigen
 	suMesh::ConstVertexIter  v_it(mesh_.vertices_begin()), v_end(mesh_.vertices_end());
 
 	suMesh::Point p;
@@ -35,6 +37,7 @@ void suMeshViewer::openMesh(std::string filename)
 	rows = mesh_.n_faces();
 	F.resize(rows, 3);
 
+	progress("Add vertices", 101);
 	//add vertices
 	for (; v_it != v_end; ++v_it)
 	{
@@ -42,6 +45,7 @@ void suMeshViewer::openMesh(std::string filename)
 		V.row(v_it->idx()) << p[0], p[1], p[2];
 	}
 	//add face vertice 
+	progress("Add face vertice", 150);
 	suMesh::ConstFaceIter f_it(mesh_.faces_begin()), f_end(mesh_.faces_end());
 	int idxFace = 0;
 	for (; f_it != f_end; f_it++)
@@ -56,7 +60,7 @@ void suMeshViewer::openMesh(std::string filename)
 		}
 		idxFace++;
 	}
-
+	progress("Get bounding box", 200);
 	//get bounding box
 	Eigen::Vector3d m = V.colwise().minCoeff();
 	Eigen::Vector3d M = V.colwise().maxCoeff();
@@ -93,6 +97,8 @@ void suMeshViewer::openMesh(std::string filename)
 
 	//data.set_colors(C);	
 	core.align_camera_center(V, F);
+
+	progress("Data read finished", 250);
 }
 
 
@@ -134,9 +140,12 @@ void suMeshViewer::build_UI()
 			{ { "stl", "Mesh model" },{ "ply", "Mesh model" },{ "obj", "Mesh model" } }, false);
 			if (!strOpenFile.empty())
 			{
+				showProgress("Load mesh", 3);
+				
 				//Open and plot the mesh. viewer.data.set_mesh(V, F);
-				openMesh(strOpenFile);
+				openMesh(strOpenFile, mProgress);
 				//todo: add a process bar
+				mProgressWindow->setVisible(false);
 			}
 		});
 		ngui->mLayout->appendRow(0);
@@ -277,15 +286,6 @@ void suMeshViewer::build_UI()
 		});
 */
 
-//Progress bar
-		mProgressWindow = ngui->addWindow(screen->fixedSize() / 2, "Please wait...");
-		mProgressLabel = new Label(mProgressWindow, " ");
-		mProgressWindow->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 15, 15));
-		mProgressBar = new ProgressBar(mProgressWindow);
-		mProgressBar->setFixedWidth(250);
-		mProgressWindow->center();
-		mProgressWindow->setVisible(false);
-
 
 
 		//Cross section viewer
@@ -367,9 +367,22 @@ void suMeshViewer::build_UI()
 			mWindow2D->performLayout(ctx);
 		}
 
+		//Progress bar
+		mProgressWindow = ngui->addWindow(screen->fixedSize() / 2, "Please wait...");
+		mProgressLabel = new Label(mProgressWindow, "...");
+		mProgressWindow->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 15, 15));
+		mProgressBar = new ProgressBar(mProgressWindow);
+		mProgressBar->setFixedWidth(250);
+		mProgressWindow->center();
+		mProgressWindow->setVisible(false);
+
 
 		// Generate menu
 		viewer.screen->performLayout();
+
+		// Bind function
+		using namespace std::placeholders;
+		mProgress = std::bind(&suMeshViewer::showProgress, this, _1, _2);
 
 		return false;
 	};
@@ -858,6 +871,27 @@ void suMeshViewer::set_select_mode(bool bSet)
 			return false;
 		};
 	}
+}
+
+void suMeshViewer::showProgress(const std::string & _caption, float value)
+{
+	std::string caption = _caption + " ..";
+	float newValue = mProgressBar->value();
+	if (mProgressLabel->caption() != caption) {
+		newValue = 0;
+		mProgressLabel->setCaption(caption);
+	}
+
+	if (value >= 0)
+		newValue = value; /* Positive: absolute progress values */
+	else
+		newValue -= value; /* Negative: relative progress values (OpenMP) */
+
+	mProgressBar->setValue(newValue/250);
+
+	mProgressWindow->setVisible(true);
+	screen->drawAll();
+	mProgressWindow->requestFocus();
 }
 
 void suMeshViewer::coorForcedOutput(float max_x, float max_y, float max_z, int level)

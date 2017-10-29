@@ -27,12 +27,14 @@ public:
 	suMeshViewer();
 	~suMeshViewer() { clear(); }
 public:
+	typedef std::function<void(const std::string &, float)> ProgressCallback;
 	//IO functions
-	void openMesh(std::string filename);
+	void openMesh(std::string filename,  const ProgressCallback &progress = ProgressCallback());
 
 	//Interaction functions
 	void build_UI();
 	void set_select_mode(bool bSet);	
+	void showProgress(const std::string &_caption, float value);
 
 	//Data functions
 	void add_octree();
@@ -84,11 +86,15 @@ public:
 		InputMeshWireframe,
 		Scheleton
 	};
-	nanogui::ref<nanogui::ComboBox> mFEABox;
+	nanogui::ref<nanogui::ComboBox> mFEABox;	
+	nanogui::ref<nanogui::Window> mWindow2D;
+
+protected:
+	//For showing progress
+	std::function<void(const std::string &, float)> mProgress;
 	nanogui::ref<nanogui::Window> mProgressWindow;
 	nanogui::ref<nanogui::ProgressBar> mProgressBar;
 	nanogui::ref<nanogui::Label>  mProgressLabel;
-	nanogui::ref<nanogui::Window> mWindow2D;
 
 private:
 	bool  bMesh_Open;
