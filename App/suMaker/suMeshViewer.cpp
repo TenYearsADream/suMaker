@@ -21,6 +21,8 @@ using namespace std;
 suMeshViewer::suMeshViewer() : bMesh_Open(false), bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
 {
 	mFEABox = nullptr;
+
+	bShowWindow2D = false;
 }
 void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progress)
 {
@@ -111,8 +113,8 @@ void suMeshViewer::build_UI()
 	suGlobalState::gOnly().set_cross_view_dimension(255, 255);
 
 	//gui
-	callback_init = [&](igl::viewer::Viewer& viewer)
-	{
+	callback_init = [&](igl::viewer::Viewer& viewer){
+
 		using namespace nanogui;
 
 		ngui->setFixedSize(Eigen::Vector2i(60, 20));
@@ -151,7 +153,7 @@ void suMeshViewer::build_UI()
 		ngui->mLayout->appendRow(0);
 		ngui->mLayout->setAnchor(openBtn, nanogui::AdvancedGridLayout::Anchor(1, ngui->mLayout->rowCount() - 1, 3, 1));
 
-		//// Advanced setting--------------------
+		//// ------------------Advanced setting--------------------
 		ngui->addPopupButton("View Setting..", Color(150, 0, 0, 25), 0);
 
 		/// Horizotal buttons
@@ -206,7 +208,7 @@ void suMeshViewer::build_UI()
 		ngui->addVariableOnPopup("Show faces labels", core.show_faceid);
 
 		// Create volumization Setting
-		// ---------------------- Create popup advanced option panel ------------- ---------
+		// ---------------------- Create popup volumization  panel ------------- ---------
 		ngui->addPopupButton("Volumization..", nanogui::Color(255, 0, 0, 25), ENTYPO_ICON_LAYOUT);
 		ngui->addGroupOnPopup("Parameters");
 		ngui->addVariableOnPopup("Octree Deep", nDeep_);
@@ -216,6 +218,7 @@ void suMeshViewer::build_UI()
 			add_octree();
 		});
 
+		ngui->addVariableOnPopup("Show 2D window", bShowWindow2D);
 		ngui->addGroupOnPopup("FEA Plgins");
 		ngui->mCurPanel = new Widget(ngui->mCurPopupWindow);
 		ngui->mCurPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
@@ -384,6 +387,11 @@ void suMeshViewer::build_UI()
 		using namespace std::placeholders;
 		mProgress = std::bind(&suMeshViewer::showProgress, this, _1, _2);
 
+		return false;
+	};
+
+	callback_pre_draw = [&](igl::viewer::Viewer &viewer) {
+		mWindow2D->setVisible(bShowWindow2D);
 		return false;
 	};
 }

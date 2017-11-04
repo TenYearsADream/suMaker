@@ -27,6 +27,7 @@ public:
 	suMeshViewer();
 	~suMeshViewer() { clear(); }
 public:
+	//Callback for process bar
 	typedef std::function<void(const std::string &, float)> ProgressCallback;
 	//IO functions
 	void openMesh(std::string filename,  const ProgressCallback &progress = ProgressCallback());
@@ -86,15 +87,22 @@ public:
 		InputMeshWireframe,
 		Scheleton
 	};
-	nanogui::ref<nanogui::ComboBox> mFEABox;	
-	nanogui::ref<nanogui::Window> mWindow2D;
+	
 
 protected:
+	//UI related 
+	std::vector<std::pair<int, std::string>> mExampleImages;
+	nanogui::ref<nanogui::ComboBox> mFEABox;
+	nanogui::ref<nanogui::Window> mWindow2D;
+
 	//For showing progress
 	std::function<void(const std::string &, float)> mProgress;
 	nanogui::ref<nanogui::Window> mProgressWindow;
 	nanogui::ref<nanogui::ProgressBar> mProgressBar;
 	nanogui::ref<nanogui::Label>  mProgressLabel;
+
+	//UI control
+	bool bShowWindow2D;
 
 private:
 	bool  bMesh_Open;
@@ -111,10 +119,6 @@ private:
 	cv::Mat *m_pCross_section_img;
 	SU::suVolume v;
 	suStructrueOptimizer optimizer;
-
-	//UI related 
-	std::vector<std::pair<int, std::string>> mExampleImages;
-
 };
 
 #ifndef voxelOutout
