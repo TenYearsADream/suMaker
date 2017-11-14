@@ -7,6 +7,8 @@
 #include "suVolume.h"
 class suGlobalState {
 public:
+	suGlobalState();
+	~suGlobalState() { clear(); }
 	static suGlobalState& gOnly();
 	void release();
 
@@ -22,8 +24,9 @@ public:
 
 	std::vector<int> forcedPoint;
 	//global accessible data structures
-	SU::suVolume *p_volume;
+	
 	void setVolume(SU::suVolume *p) { p_volume = p; }
+	SU::suVolume* getVolume() { return p_volume; }
 
 	std::vector<SU::OctNode> globalEnvoMorton;
 	void setEnvoMorton(std::vector<SU::OctNode> &p) { globalEnvoMorton = p; }
@@ -42,8 +45,8 @@ public:
 	//todo: add FEA engine info
 
 private:
-	suGlobalState();
-	~suGlobalState() { clear(); }
+
+	SU::suVolume *p_volume;
 
 	//store public data
 	//by using Pimpl method

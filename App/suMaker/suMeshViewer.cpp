@@ -320,7 +320,7 @@ void suMeshViewer::build_UI()
 				//genertate cross section for x,y,z				
 				if (!v.isLoad_) return;
 
-				m_pCross_section_img->setTo(cv::Scalar(255, 255, 255, 255));
+				m_pCross_section_img->setTo(cv::Scalar(255, 255, 255, 0));
 				OpenMesh::Vec3f vSize = v.bbMax_ - v.bbMin_;
 
 				switch (cross_section_option.nAxis)
