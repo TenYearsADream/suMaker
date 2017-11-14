@@ -31,6 +31,7 @@ public:
 	typedef std::function<void(const std::string &, float)> ProgressCallback;
 	//IO functions
 	void openMesh(std::string filename,  const ProgressCallback &progress = ProgressCallback());
+	void openSkeleton(std::string filename, const ProgressCallback &progress = ProgressCallback());
 
 	//Interaction functions
 	void build_UI();

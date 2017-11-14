@@ -16,6 +16,7 @@
 #include "suWriteSTL.h"
 #include <igl/viewer/ViewerData.h>
 #include <resources.h>
+#include <suSkeleton.h>
 
 using namespace std;
 suMeshViewer::suMeshViewer() : bMesh_Open(false), bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
@@ -103,6 +104,35 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 	progress("Data read finished", 250);
 }
 
+void suMeshViewer::openSkeleton(std::string filename, const ProgressCallback & progress)
+{
+	progress("Read skeleton", 0);
+	SU::suSkeleton skel;
+	if(!skel.load(filename, progress))   return;
+
+	data.clear();
+	unsigned _N = skel.getEdgesCount();
+	
+	//get edges
+	Eigen::MatrixXd p1, p2;
+	p1.resize(1, 3);
+	p2.resize(1, 3);
+	for (unsigned int i = 0; i < _N; i++) {
+		Eigen::Vector2i _e = skel.getEdge(i);
+		Eigen::Vector3f sv = skel.getVerts(_e[0]);
+		Eigen::Vector3f tv = skel.getVerts(_e[1]);
+		p1 << sv[0], sv[1], sv[2];
+		p2 << tv[0], tv[1], tv[2];
+		data.add_edges
+		(p1, p2,
+		Eigen::RowVector3d(1, 0, 0)  //color
+		);
+		progress("Add edge...", 20 + (float)i / _N * 230);
+		
+	}
+	progress("Read finished", 250);
+}
+
 
 void suMeshViewer::build_UI()
 {
@@ -133,21 +163,47 @@ void suMeshViewer::build_UI()
 		ImagePanel *panel = new nanogui::ImagePanel(vscroll);
 
 		auto ctx = this->screen->nvgContext();
+		
 		mExampleImages.insert(mExampleImages.begin(),
 			std::make_pair(nvgImageIcon(ctx, loadmesh), ""));
+		mExampleImages.insert(mExampleImages.end(),
+			std::make_pair(nvgImageIcon(ctx, loadskeleton), ""));
+
+
 		panel->setImages(mExampleImages);
 		panel->setCallback([&, openBtn](int i) {
 			openBtn->setPushed(false);
-			std::string strOpenFile = nanogui::file_dialog(
-			{ { "stl", "Mesh model" },{ "ply", "Mesh model" },{ "obj", "Mesh model" } }, false);
-			if (!strOpenFile.empty())
-			{
-				showProgress("Load mesh", 3);
-				
-				//Open and plot the mesh. viewer.data.set_mesh(V, F);
-				openMesh(strOpenFile, mProgress);
-				//todo: add a process bar
-				mProgressWindow->setVisible(false);
+
+			//load mesh
+			if (i == 0) { 
+				std::string strOpenFile = nanogui::file_dialog(
+				{ { "stl", "Mesh model" },{ "ply", "Mesh model" },{ "obj", "Mesh model" } }, false);
+				if (!strOpenFile.empty())
+				{
+					showProgress("Load mesh", 3);
+
+					//Open and plot the mesh. viewer.data.set_mesh(V, F);
+					openMesh(strOpenFile, mProgress);
+					//todo: add a process bar
+					mProgressWindow->setVisible(false);
+				}
+
+			}
+			
+			//load skeleton
+			if (i == 1) {
+				std::string strOpenFile = nanogui::file_dialog(
+				{ { "cgal", "Mesh skeleton" },{ "ske", "Mesh skeleton" }}, false);
+				if (!strOpenFile.empty())
+				{
+					showProgress("Load skeleton", 3);
+
+					//Open and plot the mesh. viewer.data.set_mesh(V, F);
+					openSkeleton(strOpenFile, mProgress);
+					//todo: add a process bar
+					mProgressWindow->setVisible(false);
+				}
+
 			}
 		});
 		ngui->mLayout->appendRow(0);

@@ -7,8 +7,12 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(APP_NAME suMaker)
 project(${APP_NAME})
 
-######################External Lib Setting Begin#####################
-###保留libgl的设置(from libgl tutorial)
+###################################
+#    External Lib Setting Begin   #
+###################################
+option(suMaker_USE_CGAL      "Use CGAL to extract mesh skeleton"     OFF)
+
+### 保留libgl的设置(from libgl tutorial)
 ### libIGL options: choose between header only and compiled static library
 option(LIBIGL_USE_STATIC_LIBRARY "Use LibIGL as static library" OFF)
 option(LIBIGL_WITH_VIEWER      "Use OpenGL viewer"  ON)
@@ -95,6 +99,7 @@ set(PNG_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/comb.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/delete_stroke.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/loadmesh.png
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources/loadskeleton.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/scare.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/sing_dir.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/sing_pos.png
@@ -133,6 +138,14 @@ set(SRC_LIST ${SRC_SOURCES}
 
 set(PROJECT_INCLUDE_DIRS ${${APP_NAME}_SOURCE_DIR}/include)
 set(PROJECT_LIBRARY_DIRS ${${APP_NAME}_SOURCE_DIR}/lib)
+
+IF(suMaker_USE_CGAL)
+ find_package(CGAL QUIET COMPONENTS Core )  
+ if ( CGAL_FOUND  )
+   LIST(APPEND PROJECT_INCLUDE_DIRS  ${CGAL_USE_FILE} )
+   Message(${CGAL_USE_FILE})
+ endif()
+ENDIF()
 
 include_directories(
   ${OPENCV2_INCLUDE_PATH}
