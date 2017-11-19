@@ -930,6 +930,10 @@ void suMeshViewer::set_select_mode(bool bSet)
 		};
 	}
 	else {
+		
+		data.uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
+			Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
+			Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
 		callback_mouse_move = [&](igl::viewer::Viewer& viewer, int, int)->bool
 		{
 			return false;
