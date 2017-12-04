@@ -110,7 +110,7 @@ void suMeshViewer::openSkeleton(std::string filename, const ProgressCallback & p
 	SU::suSkeleton skel;
 	if(!skel.load(filename, progress))   return;
 
-	data.clear();
+	data.lines = Eigen::MatrixXd(0, 9);
 	unsigned _N = skel.getEdgesCount();
 	
 	//get edges
