@@ -327,6 +327,7 @@ void suMeshViewer::build_UI()
 			{
 				//Save voxilized model to mesh by metaball and MC;				
 				//export_stl_with_metaball(strSaveFile.c_str(), v.leafBoundaryNodes_);
+				export_inp(strExportFile);
 			}
 		});
 		ngui->mLayout->appendRow(0);
@@ -1970,12 +1971,20 @@ bool suMeshViewer::export_stl_with_metaball(const char* fileName, std::vector<SU
 	return true;
 }
 
-bool suMeshViewer::export_inp(const char * fileName)
+bool suMeshViewer::export_inp(std::string fileName)
 {
 	if (!v.isLoad_ || v.leafBoundaryNodes_.empty()) return false;
 
+	auto idx = fileName.find_last_of('.');
+	if (idx == std::string::npos ) {
+		fileName = fileName + ".inp";
+	}
+	else {
+		std::string ext = fileName.substr(idx);
+		if (ext != ".inp") fileName = fileName + ".inp";
+	}
+	
 
+	return v.saveBaseInp(std::string(fileName));
 
-
-	return false;
 }
