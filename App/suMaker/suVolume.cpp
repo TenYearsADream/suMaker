@@ -812,6 +812,29 @@ namespace SU {
 
 		return 0;
 	}
+	class CmpVec
+	{
+	public:
+
+		CmpVec(float _eps = FLT_MIN) : eps_(_eps) {}
+
+		bool operator()(const SU::Point& _v0, const SU::Point& _v1) const
+		{
+			if (fabs(_v0[0] - _v1[0]) <= eps_)
+			{
+				if (fabs(_v0[1] - _v1[1]) <= eps_)
+				{
+					return (_v0[2] < _v1[2] - eps_);
+				}
+				else return (_v0[1] < _v1[1] - eps_);
+			}
+			else return (_v0[0] < _v1[0] - eps_);
+		}
+
+	private:
+		float eps_;
+	};
+
 
 	bool suVolume::saveBaseInp(std::string filename)
 	{
@@ -831,7 +854,8 @@ namespace SU {
 			int node_index[8];
 		};
 		std::vector<_Element> _elements;
-		std::map<SU::Point, unsigned int> _nodeMap;
+		CmpVec comp(FLT_MIN);
+		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;
 
 		while (it != nodeArr_.end())
 		{
@@ -862,13 +886,13 @@ namespace SU {
 					ele.node_index[k] = n->second;
 				}
 			}
-		
+			_elements.push_back(ele);
 			it++;
 		}
 
 		std::stringbuf strInp;
 		std::ofstream inpFile;
-		inpFile.open(filename);
+		inpFile.open(filename, std::ios::out);
 
 		inpFile << "*Heading" << std::endl;
 		inpFile << "** Job name : EXAMPLE Model name : Model - 1" << std::endl;
@@ -884,7 +908,7 @@ namespace SU {
 
 		//write elements
 		os.clear();
-		os << "*Element, type = C3D8";
+		os << "*Element, type = C3D8" << std::endl;
 		for (unsigned int i = 0; i < _elements.size(); i++) {
 			os << i << ",  ";
 			for (int j = 0; j < 7; j++) {

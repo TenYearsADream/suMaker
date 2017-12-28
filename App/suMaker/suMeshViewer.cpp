@@ -1983,7 +1983,6 @@ bool suMeshViewer::export_inp(std::string fileName)
 		std::string ext = fileName.substr(idx);
 		if (ext != ".inp") fileName = fileName + ".inp";
 	}
-	
 
 	return v.saveBaseInp(std::string(fileName));
 
