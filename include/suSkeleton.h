@@ -96,8 +96,11 @@ namespace SU {
 					tv << std::stof(strs[4]), std::stof(strs[5]), std::stof(strs[6]);
 					add_edge(sv, tv);
 					std::stringstream ss;
-					ss << nLine++;
-					progress("Read lines " + ss.str(), 20.0f);
+					if (nLine++ % 10 == 0) {
+						ss << nLine;
+						progress("Read lines " + ss.str(), 20.0f);
+					}
+					
 				}
 
 			}
