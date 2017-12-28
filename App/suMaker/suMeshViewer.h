@@ -37,6 +37,7 @@ public:
 	void build_UI();
 	void set_select_mode(bool bSet);	
 	void showProgress(const std::string &_caption, float value);
+	void setTitle(std::string strWinTitle);
 
 	//Data functions
 	void add_octree();
@@ -60,6 +61,7 @@ public:
 
 	void outStlFile(std::vector<SU::OctNode> &stlVector);
 	bool export_stl_with_metaball(const char* fileName, std::vector<SU::OctNode> &stlVector);    //根据表面体素生成元球模型
+	bool export_inp(const char* fileName);
 	
 	
 	void clear();
@@ -90,6 +92,8 @@ public:
 	};
 	
 
+	std::string cur_opened_mesh_filename;   
+
 protected:
 	//UI related 
 	std::vector<std::pair<int, std::string>> mExampleImages;
@@ -105,10 +109,10 @@ protected:
 	//UI control
 	bool bShowWindow2D;
 
-private:
-	bool  bMesh_Open;
+private:	
 	bool  bSelect_Mode;
 	suMesh mesh_;	
+	
 	std::vector<float> all_point_mises_strain;
 	std::vector<int> point_morton;
 	

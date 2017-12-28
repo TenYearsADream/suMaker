@@ -100,6 +100,7 @@ set(PNG_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/delete_stroke.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/loadmesh.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/loadskeleton.png
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources/export_inp.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/scare.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/sing_dir.png
   ${CMAKE_CURRENT_SOURCE_DIR}/resources/sing_pos.png

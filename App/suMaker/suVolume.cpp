@@ -812,5 +812,58 @@ namespace SU {
 		return 0;
 	}
 
+	bool suVolume::saveBaseInp(std::string filename)
+	{
+		if (leafBoundaryNodes_.empty()) return false;
+
+		std::vector<SU::OctNode*> nodeArr_ = leafInternalNodes_;		
+		
+		nodeArr_.insert(nodeArr_.end(), leafBoundaryNodes_.begin(), leafBoundaryNodes_.end());
+					
+
+		int nElements = nodeArr_.size();
+		int nPoints = nodeArr_.size() * 8;
+
+		std::vector<SU::OctNode*>::iterator it = nodeArr_.begin();
+		std::vector<SU::Point> _nodes;
+		struct _Element {
+			int node_index[8];
+		};
+		std::vector<_Element> _elements;
+		std::map<SU::Point, int> _nodeMap;
+
+		while (it != nodeArr_.end())
+		{
+			SU::Point &m = (*it)->min_;
+			SU::Point &M = (*it)->max_;
+			_Element ele;
+
+			//generate vertices for each voxel
+			SU::Point v[8];
+			v[0] = SU::Point(m.x, m.y, m.z);
+			v[1] = SU::Point(M.x, m.y, m.z);
+			v[2] = SU::Point(M.x, M.y, m.z);
+			v[3] = SU::Point(m.x, M.y, m.z);
+			v[4] = SU::Point(m.x, m.y, M.z);
+			v[5] = SU::Point(M.x, m.y, M.z);
+			v[6] = SU::Point(M.x, M.y, M.z);
+			v[7] = SU::Point(m.x, M.y, M.z);
+
+			for (int k = 0; k < 8; k++) {
+				auto n = _nodeMap.find(v[k]);
+				if (n == _nodeMap.end()) {
+					_nodes.push_back(v[k]);
+					unsigned int idx = _nodes.size() - 1;
+					_nodeMap[v[k] ] = idx;
+					ele.node_index[k] = idx;
+				}
+			}
+		
+			it++;
+		}
+		
+		return false;
+	}
+
 
 }//end namespace SU

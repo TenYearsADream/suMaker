@@ -19,7 +19,7 @@
 #include <suSkeleton.h>
 
 using namespace std;
-suMeshViewer::suMeshViewer() : bMesh_Open(false), bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
+suMeshViewer::suMeshViewer() : bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
 {
 	mFEABox = nullptr;
 
@@ -91,8 +91,7 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 		M(0), m(1), M(2),
 		M(0), M(1), M(2),
 		m(0), M(1), M(2);
-
-	bMesh_Open = true;
+	
 	data.clear();
 	data.set_mesh(V, F);
 
@@ -102,6 +101,8 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 	core.align_camera_center(V, F);
 
 	progress("Data read finished", 250);
+	cur_opened_mesh_filename = filename;
+	setTitle(cur_opened_mesh_filename);
 }
 
 void suMeshViewer::openSkeleton(std::string filename, const ProgressCallback & progress)
@@ -131,6 +132,9 @@ void suMeshViewer::openSkeleton(std::string filename, const ProgressCallback & p
 		
 	}
 	progress("Read finished", 250);
+	cur_opened_mesh_filename = filename;
+	setTitle(cur_opened_mesh_filename);
+
 }
 
 
@@ -311,14 +315,14 @@ void suMeshViewer::build_UI()
 		VScrollPanel *export_vscroll = new nanogui::VScrollPanel(export_popup);
 		ImagePanel *export_panel = new nanogui::ImagePanel(export_vscroll);
 
-
-		/*mExampleImages.insert(mExampleImages.begin(),
-			std::make_pair(nvgImageIcon(ctx, loadmesh), ""));*/
+		mExampleImages.clear();
+		mExampleImages.insert(mExampleImages.begin(),
+			std::make_pair(nvgImageIcon(ctx, export_inp), ""));
 		export_panel->setImages(mExampleImages);
 		export_panel->setCallback([&, exportBtn](int i) {
 			exportBtn->setPushed(false);
 			std::string strExportFile = nanogui::file_dialog(
-			{ { "stl", "Mesh model" },{ "ply", "Mesh model" },{ "obj", "Mesh model" } }, true);
+			{ { "inp", "Abquas input model" }}, true);
 			if (!strExportFile.empty())
 			{
 				//Save voxilized model to mesh by metaball and MC;				
@@ -454,7 +458,7 @@ void suMeshViewer::build_UI()
 
 void suMeshViewer::add_octree()
 {
-	if (!bMesh_Open) return;
+	if (mesh_.faces_empty()) return;	
 
 	v.LoadMeshFromMesh(mesh_);
 	v.PartitionSpace(nDeep_);
@@ -463,6 +467,8 @@ void suMeshViewer::add_octree()
 	std::cout << "internal node: " << v.leafInternalNodes_.size() << std::endl;
 	//for test
 	nodeArr_.insert(nodeArr_.end(), v.leafBoundaryNodes_.begin(), v.leafBoundaryNodes_.end());
+	std::cout << "boundary node: " << v.leafBoundaryNodes_.size() << std::endl;
+	
 	//add box
 	Eigen::MatrixXd box;
 	box.resize(8, 3);
@@ -894,13 +900,14 @@ void suMeshViewer::add_bounding_box()
 
 void suMeshViewer::clear()
 {
+
 	suGlobalState::gOnly().release();
 	if (!m_pCross_section_img) delete m_pCross_section_img;
 }
 
 void suMeshViewer::set_select_mode(bool bSet)
 {
-	if (bSet && bMesh_Open)
+	if (bSet && !mesh_.faces_empty())
 	{
 		//set select model
 		C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
@@ -960,6 +967,11 @@ void suMeshViewer::showProgress(const std::string & _caption, float value)
 	mProgressWindow->setVisible(true);
 	screen->drawAll();
 	mProgressWindow->requestFocus();
+}
+
+void suMeshViewer::setTitle(std::string strWinTitle)
+{
+	glfwSetWindowTitle(window, strWinTitle.c_str());
 }
 
 void suMeshViewer::coorForcedOutput(float max_x, float max_y, float max_z, int level)
@@ -1956,4 +1968,14 @@ bool suMeshViewer::export_stl_with_metaball(const char* fileName, std::vector<SU
 		SU::write_metaball_to_stl(fileName, /*samples*/mballs, fThresholdMC, resolution, bbox);
 
 	return true;
+}
+
+bool suMeshViewer::export_inp(const char * fileName)
+{
+	if (!v.isLoad_ || v.leafBoundaryNodes_.empty()) return false;
+
+
+
+
+	return false;
 }

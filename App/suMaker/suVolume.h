@@ -24,6 +24,14 @@ namespace SU{
 		bool operator>(const Point& p2) const { return x > p2.x && y > p2.y && z > p2.z; }
 		bool operator>=(const Point& p2) const { return x >= p2.x && y >= p2.y && z >= p2.z; }
 		bool operator<=(const Point& p2) const { return x <= p2.x && y <= p2.y && z <= p2.z; }
+		bool operator==(const Point& p2) const {
+			if (fabs(x - p2.x) <= FLT_MIN){
+				if (fabs(y - p2.y) <= FLT_MIN){
+					return fabs(z - p2.z) <= FLT_MIN;
+				}
+			}
+			return false;
+		}
 		Point operator*(Point& p2) { //Cross product
 			return Point(
 				(y * p2.z) - (z * p2.y),
@@ -159,6 +167,7 @@ namespace SU{
 		//IO
 		bool saveVTK(const char *pVTKFileName, int level = 3, const char *pVTKHead = "UnKnown Name",
 			float dx = 0, float dy = 0, float dz = 0);
+		bool saveBaseInp(std::string filename);   //fill .inp file with nodes and elements
 
 		bool LoadMeshFromMesh(suMesh &m);
 		bool LoadMeshFromFile(const char *pFileName);
