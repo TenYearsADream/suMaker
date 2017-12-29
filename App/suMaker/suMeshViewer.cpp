@@ -464,7 +464,7 @@ void suMeshViewer::add_octree()
 	v.LoadMeshFromMesh(mesh_);
 	v.PartitionSpace(nDeep_);
 
-	std::vector<SU::OctNode*> &nodeArr_ = v.leafInternalNodes_;
+	std::vector<SU::OctNode*> nodeArr_ = v.leafInternalNodes_;
 	std::cout << "internal node: " << v.leafInternalNodes_.size() << std::endl;
 	//for test
 	nodeArr_.insert(nodeArr_.end(), v.leafBoundaryNodes_.begin(), v.leafBoundaryNodes_.end());
