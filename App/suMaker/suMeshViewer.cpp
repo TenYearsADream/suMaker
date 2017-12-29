@@ -154,9 +154,24 @@ void suMeshViewer::build_UI()
 		ngui->setFixedSize(Eigen::Vector2i(60, 20));
 
 		// -----------Create nanogui widgets	
-
+		auto ctx = this->screen->nvgContext();
 		/*Tool Panel*/
 		nanogui::Window *curWindow = ngui->addWindow(Eigen::Vector2i(10, 10), "Tool Panel");
+		////About
+		//nanogui::Button *about = new nanogui::Button(curWindow, "", ENTYPO_ICON_INFO);
+
+		//about->setCallback([&, ctx]() {
+		//	auto dlg = new nanogui::MessageDialog(
+		//		screen->window(), nanogui::MessageDialog::Type::Information, "About suMaker",
+		//		"suMaker is freely available under a BSD-style license. "
+		//		"If you use the meshes obtained with this software, we kindly "
+		//		"request that you acknowledge this and link to the project page at\n\n"
+		//		"\thttp://cloudsfab.com/research/\n\n");
+		//	dlg->messageLabel()->setFixedWidth(550);
+		//	dlg->messageLabel()->setFontSize(20);
+		//	curWindow->performLayout(ctx);
+		//	dlg->center();
+		//});
 
 		// ---------------------- Create popup load mesh panel ----------------------		
 		PopupButton *openBtn = new nanogui::PopupButton(ngui->window(), "Open mesh");
@@ -166,7 +181,7 @@ void suMeshViewer::build_UI()
 		VScrollPanel *vscroll = new nanogui::VScrollPanel(popup);
 		ImagePanel *panel = new nanogui::ImagePanel(vscroll);
 
-		auto ctx = this->screen->nvgContext();
+		
 		
 		mExampleImages.insert(mExampleImages.begin(),
 			std::make_pair(nvgImageIcon(ctx, loadmesh), ""));
@@ -332,24 +347,6 @@ void suMeshViewer::build_UI()
 		});
 		ngui->mLayout->appendRow(0);
 		ngui->mLayout->setAnchor(exportBtn, nanogui::AdvancedGridLayout::Anchor(1, ngui->mLayout->rowCount() - 1, 3, 1));
-
-		//About
-		//nanogui::Button *about = new nanogui::Button(ngui->window()->buttonPanel(), "", ENTYPO_ICON_INFO);
-
-		/*about->setCallback([&, ctx]() {
-			auto dlg = new nanogui::MessageDialog(
-				screen->window(), nanogui::MessageDialog::Type::Information, "About suMaker",
-				"suMaker is freely available under a BSD-style license. "
-				"If you use the meshes obtained with this software, we kindly "
-				"request that you acknowledge this and link to the project page at\n\n"
-				"\thttp://cloudsfab.com/research/\n\n");
-			dlg->messageLabel()->setFixedWidth(550);
-			dlg->messageLabel()->setFontSize(20);
-			curWindow->performLayout(ctx);
-			dlg->center();
-		});
-*/
-
 
 
 		//Cross section viewer
@@ -584,86 +581,15 @@ void suMeshViewer::envolution()
 		//debug
 		//std::cout << nodesEnvoMorton[(*itInternal)->morton].center().x << ", " << (**itInternal).center().x<<std::endl;
 
-	}//赋值 内部节点 
-	/*std::vector<SU::OctNode>::iterator itNodes = nodesEnvoMorton.begin();
-	int temp = 0;
-	for (;itNodes != nodesEnvoMorton.end();itNodes++) {
-		std::cout << itNodes->xLocCode_ << ' ' << itNodes->yLocCode_ << ' ' << itNodes->zLocCode_ << ' ' << temp << ' ' << itNodes->label_ << ' '
-			<< itNodes->location << std::endl;
-		temp++;
-	}*/
-
-	//修复内部
-	//std::vector<SU::OctNode>::iterator repairIt;
-	//int isEnd = 0;
-	//for (;;) {
-	//	repairIt = nodesEnvoMorton.begin();
-	//	for (;repairIt != nodesEnvoMorton.end();repairIt++) {
-	//		if (repairIt->label_ == 3 && repairIt->out == true) {
-	//			int * neighs = six_n_morton(repairIt->morton, nDeep_);
-	//			//std::cout << initIt->morton << ' ' << nDeep_;
-	//			for (int i = 0;i < 26;i++) {
-	//				if (nodesEnvoMorton[neighs[i]].out == false) {
-	//					int *code_ = code(neighs[i], nDeep_);
-	//					nodesEnvoMorton[neighs[i]].out = true;
-	//					nodesEnvoMorton[neighs[i]].xLocCode_ = code_[0];
-	//					nodesEnvoMorton[neighs[i]].yLocCode_ = code_[1];
-	//					nodesEnvoMorton[neighs[i]].zLocCode_ = code_[2];						
-	//					nodesEnvoMorton[neighs[i]].label_ = SU::INTERIOR_CELL;
-	//					nodesEnvoMorton[neighs[i]].morton = neighs[i];
-	//					isEnd++;
-	//				}
-	//			}
-	//			
-	//			delete[]neighs;
-	//	
-	//		}
-	//	}
-	//	
-	//	if (!isEnd)
-	//		break;
-	//	isEnd = 0;
-	//}
-
-	//std::cout << nodesEnvoMorton.size();
+	}
 	//距离场
 	init(nodesEnvoMorton);
-	/*for (int i = 0; i < nodesEnvoMorton.size(); i++)
-	{
-		if (nodesEnvoMorton[i].label_ == SU::INTERIOR_CELL)
-		std::cout << nodesEnvoMorton[i].center().x << std::endl;
-	}*/
 
-	//迭代
-	//...
-	//CA 优化
 	for (int k = 0; k < 3; k++)
 	{
 		caCut(nodesEnvoMorton);
 	}
-	/*caCut(nodesEnvoMorton);
-	caCut(nodesEnvoMorton);*/
 
-	///输出OOFEM加载文件（没交互）
-
-	//outForcedOofemFile(nodesEnvoMorton);
-	//system("cd /d r:\\ &oofem.exe &oofem -f oofemOutFile.txt");
-
-	/////读OOFEM输出
-	//float x = v.bbMax_.data()[0] - v.bbMin_.data()[0];
-	//float y = v.bbMax_.data()[1] - v.bbMin_.data()[1];
-	//float z = v.bbMax_.data()[2] - v.bbMin_.data()[2];
-	//read_point_information("R:\\Majnun.out.m0.1.vtu");  //应变
-	//read_point_coor("r:\\Majnun.out.m0.1.vtu", x,y,z, nDeep_);//坐标
-	//assignment(nodesEnvoMorton);//关联应变与目标
-
-
-
-	//agentCut(nodesEnvoMorton);
-
-
-	/*outOofemFile(nodesEnvoMorton);
-	system("cd /d D:\\oofem\\build2.3\\Debug &oofem.exe&oofem -f oofemOutFile.txt");*/
 
 	suGlobalState::gOnly().setEnvoMorton(nodesEnvoMorton);
 
@@ -909,14 +835,45 @@ void suMeshViewer::clear()
 void suMeshViewer::set_select_mode(bool bSet)
 {
 	if (bSet && !mesh_.faces_empty())
-	{
+	{		
 		//set select model
 		C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
+		
+		
 		callback_mouse_move =
-			[&](igl::viewer::Viewer& viewer, int, int)->bool
-		{
-			int fid = -1;
+			[&](igl::viewer::Viewer& viewer, int x, int y)->bool
+		{	
 			Eigen::Vector3f bc;
+			int fid = -1;
+			
+			// Cast a ray in the view direction starting from the mouse position
+			//double x = viewer.current_mouse_x;
+			//double 
+			y = viewer.core.viewport(3) - y;
+
+			if (igl::unproject_onto_mesh(Eigen::Vector2f(x, y), core.view * core.model,
+				core.proj, core.viewport, V, F, fid, bc))
+			{				
+				// paint hit red
+				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
+				C.row(fid) << 1, 0, 0;
+				viewer.data.set_colors(C);				
+				return true;
+			}
+			else {
+				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
+				viewer.data.set_colors(C);
+				
+			}
+			return false;
+		};
+
+		//set mouse click callback to get select face
+		callback_mouse_down =
+			[&](igl::viewer::Viewer& viewer, int button, int)->bool 
+		{
+			Eigen::Vector3f bc;
+			int fid = -1;
 			// Cast a ray in the view direction starting from the mouse position
 			double x = viewer.current_mouse_x;
 			double y = viewer.core.viewport(3) - viewer.current_mouse_y;
@@ -925,15 +882,11 @@ void suMeshViewer::set_select_mode(bool bSet)
 				core.proj, core.viewport, V, F, fid, bc))
 			{
 				// paint hit red
-				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
-				C.row(fid) << 1, 0, 0;
-				viewer.data.set_colors(C);
-				return true;
+				std::cout << fid << " is selected " << std::endl;
+				//suGlobalState::gOnly()
+				return false;
 			}
-			else {
-				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
-				viewer.data.set_colors(C);
-			}
+			
 			return false;
 		};
 	}
@@ -943,6 +896,11 @@ void suMeshViewer::set_select_mode(bool bSet)
 			Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
 			Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
 		callback_mouse_move = [&](igl::viewer::Viewer& viewer, int, int)->bool
+		{
+			return false;
+		};
+		callback_mouse_down =
+			[&](igl::viewer::Viewer& viewer, int, int)->bool
 		{
 			return false;
 		};

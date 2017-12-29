@@ -33,7 +33,7 @@ public:
 	void openMesh(std::string filename,  const ProgressCallback &progress = ProgressCallback());
 	void openSkeleton(std::string filename, const ProgressCallback &progress = ProgressCallback());
 
-	//Interaction functions
+	//UI functions
 	void build_UI();
 	void set_select_mode(bool bSet);	
 	void showProgress(const std::string &_caption, float value);
@@ -108,9 +108,9 @@ protected:
 
 	//UI control
 	bool bShowWindow2D;
+	bool bSelect_Mode;
 
 private:	
-	bool  bSelect_Mode;
 	suMesh mesh_;	
 	
 	std::vector<float> all_point_mises_strain;

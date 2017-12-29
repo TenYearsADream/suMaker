@@ -5,6 +5,7 @@
  *\date  2016-07-08
  */
 #include "suVolume.h"
+
 class suGlobalState {
 public:
 	suGlobalState();
@@ -44,6 +45,9 @@ public:
 	//app config
 	//todo: add FEA engine info
 
+	//constraint setting
+	std::vector<int> load_face_list;          //for load setting
+	std::vector<int> boundary_face_list;      //for freedom setting
 private:
 
 	SU::suVolume *p_volume;
