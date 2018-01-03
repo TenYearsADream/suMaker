@@ -48,6 +48,7 @@ public:
 	//constraint setting
 	std::vector<int> load_face_list;          //for load setting
 	std::vector<int> boundary_face_list;      //for freedom setting
+	std::vector<int> selected_face_list;      //list of selected face indexes
 private:
 
 	SU::suVolume *p_volume;

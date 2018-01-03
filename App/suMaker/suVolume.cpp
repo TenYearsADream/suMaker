@@ -835,7 +835,10 @@ namespace SU {
 		float eps_;
 	};
 
-
+	/************************************
+	* saveBaseInp
+	* Only nodes and elements are saved.
+	************************************/
 	bool suVolume::saveBaseInp(std::string filename)
 	{
 		if (leafBoundaryNodes_.empty()) return false;

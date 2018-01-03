@@ -855,16 +855,13 @@ void suMeshViewer::set_select_mode(bool bSet)
 				core.proj, core.viewport, V, F, fid, bc))
 			{				
 				// paint hit red
-				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
+				Eigen::Vector3d ori_color = C.row(fid);
 				C.row(fid) << 1, 0, 0;
-				viewer.data.set_colors(C);				
+				viewer.data.set_colors(C);	
+				C.row(fid) = ori_color;
 				return true;
 			}
-			else {
-				C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
-				viewer.data.set_colors(C);
-				
-			}
+			
 			return false;
 		};
 
@@ -881,10 +878,19 @@ void suMeshViewer::set_select_mode(bool bSet)
 			if (igl::unproject_onto_mesh(Eigen::Vector2f(x, y), core.view * core.model,
 				core.proj, core.viewport, V, F, fid, bc))
 			{
-				// paint hit red
-				std::cout << fid << " is selected " << std::endl;
-				//suGlobalState::gOnly()
+				if (button == static_cast<int>(MouseButton::Left)) {
+					// paint hit red
+					std::cout << fid << " is selected " << std::endl;
+					suGlobalState::gOnly().selected_face_list.push_back(fid);
+					C.row(fid) << 1, 0, 0;
+				}
+				else if (button == static_cast<int>(MouseButton::Right)) {
+					std::cout << " selected faces is cleared " << std::endl;
+					suGlobalState::gOnly().selected_face_list.clear();
+					C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
+				}
 				return false;
+				
 			}
 			
 			return false;
