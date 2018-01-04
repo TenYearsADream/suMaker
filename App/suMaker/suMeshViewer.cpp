@@ -312,7 +312,18 @@ void suMeshViewer::build_UI()
 			bSelect_Mode = !bSelect_Mode;
 			set_select_mode(bSelect_Mode);
 		});
-
+		ngui->addButton("Add Force", [&] {
+			if (!bSelect_Mode) return;
+			suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
+			//todo: add dialog to export .inp by v.addForce(filename, suGlobalState::gOnly().load_face_list)
+			std::cout << suGlobalState::gOnly().load_face_list.size() << std::endl;
+		});
+		ngui->addButton("Add Constraint", [&] {
+			if (!bSelect_Mode) return;
+			suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
+			//todo::add dialog to export .inp by v.addBoundary(filename, suGlobalState::gOnly().boundary_face_list)
+			std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
+		});
 		//Optimizaton
 		ngui->addGroup("Structure Evolution");
 		ngui->addVariable("MC threshold", fThresholdMC);

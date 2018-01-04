@@ -55,8 +55,13 @@ namespace SU{
 		UNDEFINE_CELL = 4,           // 未定义节点
 	}NODE_LABEL;
 
+	/**
+	* suNode holds additional mesh and voxel data
+	* that can be used in space partition and boolean operation
+	*/
 	class suNode{
 	public:
+		suNode():element_id(-1){}
 		int AddElement(suMesh::VertexIter  CurrentVertexIter, char Label = 'U')
 		{
 			VertexVector.push_back(CurrentVertexIter);
@@ -96,6 +101,8 @@ namespace SU{
 		//face handle in the node
 		std::vector<suMesh::FaceHandle>     FaceVector;
 		std::vector<char>                   LabelVector;
+		//element id in fem file, such .inp
+		int element_id;                 
 	};
 
 	struct OctNode
@@ -167,7 +174,9 @@ namespace SU{
 		//IO
 		bool saveVTK(const char *pVTKFileName, int level = 3, const char *pVTKHead = "UnKnown Name",
 			float dx = 0, float dy = 0, float dz = 0);
-		bool saveBaseInp(std::string filename);   //fill .inp file with nodes and elements
+		bool saveBaseInp(std::string filename);  //fill .inp file with nodes and elements
+		bool addForce(std::string filename, std::vector<int> face_list_force);    //default force direction = face normal
+		bool addBoundary(std::string filename, std::vector<int> face_list_fix);   
 
 		bool LoadMeshFromMesh(suMesh &m);
 		bool LoadMeshFromFile(const char *pFileName);

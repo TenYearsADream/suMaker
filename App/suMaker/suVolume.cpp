@@ -838,61 +838,65 @@ namespace SU {
 	/************************************
 	* saveBaseInp
 	* Only nodes and elements are saved.
+	* Add element_id to each OctNode
 	************************************/
 	bool suVolume::saveBaseInp(std::string filename)
 	{
 		if (leafBoundaryNodes_.empty()) return false;
 
-		std::vector<SU::OctNode*> nodeArr_ = leafInternalNodes_;		
-		std::cout << "internal node: " << leafInternalNodes_.size() << std::endl;
-		nodeArr_.insert(nodeArr_.end(), leafBoundaryNodes_.begin(), leafBoundaryNodes_.end());
-		std::cout << "boundary node: " << leafBoundaryNodes_.size() << std::endl;
-
-		int nElements = nodeArr_.size();
-		int nPoints = nodeArr_.size() * 8;
-
-		std::vector<SU::OctNode*>::iterator it = nodeArr_.begin();
-		std::vector<SU::Point> _nodes;
 		struct _Element {
 			int node_index[8];
 		};
 		std::vector<_Element> _elements;
-		CmpVec comp(FLT_MIN);
-		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;
+		std::vector<SU::Point> _nodes;
+		CmpVec comp(FLT_MIN);               
+		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;  
 
-		while (it != nodeArr_.end())
-		{
-			SU::Point &m = (*it)->min_;
-			SU::Point &M = (*it)->max_;
-			_Element ele;
+		// define a lambda function to satisfy
+		// 1. add element_id to original leafBoundaryNodes_ and leafInternalNodes_
+		// 2. ensure the uniqueness of the nodes and elements 
+		auto gen_element = [&](std::vector<SU::OctNode*> &oct_nodes) {
+			
+			std::vector<SU::OctNode*>::iterator it = oct_nodes.begin();
 
-			//generate vertices for each voxel
-			SU::Point v[8];
-			v[0] = SU::Point(m.x, m.y, m.z);
-			v[1] = SU::Point(M.x, m.y, m.z);
-			v[2] = SU::Point(M.x, M.y, m.z);
-			v[3] = SU::Point(m.x, M.y, m.z);
-			v[4] = SU::Point(m.x, m.y, M.z);
-			v[5] = SU::Point(M.x, m.y, M.z);
-			v[6] = SU::Point(M.x, M.y, M.z);
-			v[7] = SU::Point(m.x, M.y, M.z);
+			while (it != oct_nodes.end())
+			{
+				SU::Point &m = (*it)->min_;
+				SU::Point &M = (*it)->max_;
+				_Element ele;
 
-			for (int k = 0; k < 8; k++) {
-				auto n = _nodeMap.find(v[k]);
-				if (n == _nodeMap.end()) {
-					_nodes.push_back(v[k]);
-					unsigned int idx = _nodes.size() - 1;
-					_nodeMap[v[k] ] = idx;
-					ele.node_index[k] = idx;
+				//generate vertices for each voxel
+				SU::Point v[8];
+				v[0] = SU::Point(m.x, m.y, m.z);
+				v[1] = SU::Point(M.x, m.y, m.z);
+				v[2] = SU::Point(M.x, M.y, m.z);
+				v[3] = SU::Point(m.x, M.y, m.z);
+				v[4] = SU::Point(m.x, m.y, M.z);
+				v[5] = SU::Point(M.x, m.y, M.z);
+				v[6] = SU::Point(M.x, M.y, M.z);
+				v[7] = SU::Point(m.x, M.y, M.z);
+
+				for (int k = 0; k < 8; k++) {
+					auto n = _nodeMap.find(v[k]);
+					if (n == _nodeMap.end()) {
+						_nodes.push_back(v[k]);
+						unsigned int idx = _nodes.size();
+						_nodeMap[v[k]] = idx;
+						ele.node_index[k] = idx;
+					}
+					else {
+						ele.node_index[k] = n->second;
+					}
 				}
-				else {
-					ele.node_index[k] = n->second;
-				}
+				_elements.push_back(ele);
+				(*it)->suNode_.element_id = _elements.size();  //record element id
+				it++;
 			}
-			_elements.push_back(ele);
-			it++;
-		}
+		};
 
+		gen_element(leafInternalNodes_);
+		gen_element(leafBoundaryNodes_);
+		
 		std::stringbuf strInp;
 		std::ofstream inpFile;
 		inpFile.open(filename, std::ios::out);
@@ -905,7 +909,7 @@ namespace SU {
 	    // write nodes
 		std::stringstream os;
 		for (unsigned int i = 0; i < _nodes.size(); i++) {
-			os << i << ",  " << _nodes[i].x << ",   " << _nodes[i].y << ",   " << _nodes[i].z << std::endl;
+			os << i + 1 << ",  " << _nodes[i].x << ",   " << _nodes[i].y << ",   " << _nodes[i].z << std::endl;
 		}
 		inpFile << os.str();
 
@@ -914,7 +918,7 @@ namespace SU {
 		os.clear();
 		os << "*Element, type = C3D8" << std::endl;
 		for (unsigned int i = 0; i < _elements.size(); i++) {
-			os << i << ",  ";
+			os << i + 1 << ",  ";
 			for (int j = 0; j < 7; j++) {
 				os << _elements[i].node_index[j] << ",   "; 
 			}
@@ -926,7 +930,67 @@ namespace SU {
 
 		os.str(std::string());
 		os.clear();
-		nodeArr_.clear();
+
+		return false;
+	}
+
+	bool suVolume::addForce(std::string filename, std::vector<int> face_list_force)
+	{
+		std::ifstream File(filename);
+		return (!File.fail());
+
+
+		std::map<int, int> force_elements;
+
+		std::vector<OctNode*>::iterator it = leafBoundaryNodes_.begin();
+		for (; it != leafBoundaryNodes_.end(); ++it) {
+
+			//convert handle to id
+			std::vector<int> faceid_list;
+			std::vector<OpenMesh::FaceHandle>::iterator f_it = (*it)->suNode_.FaceVector.begin();
+			for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
+				faceid_list.push_back(f_it->idx());
+			}
+		    //if selected node
+			for (int i = 0; i < face_list_force.size(); i++) {
+				if (std::find(faceid_list.begin(),
+					faceid_list.end(),
+					face_list_force[i]) != faceid_list.end()) {
+					force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
+				}
+			}			
+		}
+
+		std::ofstream inpFile;
+		inpFile.open(filename, std::ios::app);
+
+		inpFile << "*NSET, NSET = FemLoadFixed";
+
+		std::stringstream os;
+
+		int ii = 0;
+		for (std::map<int, int>::iterator it = force_elements.begin();
+			it != force_elements.end(); ++it) {
+			os <<  it->first << ", " ;
+			if (++ii % 6 == 0) os << std::endl;
+		}
+		os << std::endl;
+
+		os << "***********************************************************";
+		os << "** Node loads";
+		os << "** written by addForce function";
+		os << "*CLOAD";
+		os << "** FemLoadFixed";
+		os << "** node loads on element Face : Box:Face6";
+		os << "FemLoadFixed, 2, 100";
+		inpFile << os.str() << std::endl;
+
+		
+		return false;
+	}
+
+	bool suVolume::addBoundary(std::string filename, std::vector<int> face_list_fix)
+	{
 		return false;
 	}
 
