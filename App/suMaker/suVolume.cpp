@@ -937,7 +937,7 @@ namespace SU {
 	bool suVolume::addForce(std::string filename, std::vector<int> face_list_force)
 	{
 		std::ifstream File(filename);
-		return (!File.fail());
+		if (File.fail()) return false;
 
 
 		std::map<int, int> force_elements;
@@ -963,10 +963,10 @@ namespace SU {
 
 		std::ofstream inpFile;
 		inpFile.open(filename, std::ios::app);
-
-		inpFile << "*NSET, NSET = FemLoadFixed";
-
 		std::stringstream os;
+
+		os << "*NSET, NSET = FemLoadFixed" << std::endl;
+				
 
 		int ii = 0;
 		for (std::map<int, int>::iterator it = force_elements.begin();
@@ -976,13 +976,20 @@ namespace SU {
 		}
 		os << std::endl;
 
-		os << "***********************************************************";
-		os << "** Node loads";
-		os << "** written by addForce function";
-		os << "*CLOAD";
-		os << "** FemLoadFixed";
-		os << "** node loads on element Face : Box:Face6";
-		os << "FemLoadFixed, 2, 100";
+		os << "***********************************************************" << std::endl;
+		os << "** One step is needed to calculate the mechanical analysis of FreeCAD" << std::endl;
+		os << "** loads are applied quasi - static, means without involving the time dimension" << std::endl;
+		os << "** written by write_step_begin function" << std::endl;
+		os << "*STEP" << std::endl;
+		os << "*STATIC" << std::endl;
+
+		os << "***********************************************************" << std::endl;
+		os << "** Node loads" << std::endl;
+		os << "** written by addForce function" << std::endl;
+		os << "*CLOAD" << std::endl;
+		os << "** FemLoadFixed" << std::endl;
+		os << "** node loads on element Face : Box:Face6" << std::endl;
+		os << "FemLoadFixed, 2, 100" << std::endl;
 		inpFile << os.str() << std::endl;
 
 		

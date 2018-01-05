@@ -315,7 +315,14 @@ void suMeshViewer::build_UI()
 		ngui->addButton("Add Force", [&] {
 			if (!bSelect_Mode) return;
 			suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
-			//todo: add dialog to export .inp by v.addForce(filename, suGlobalState::gOnly().load_face_list)
+			//add dialog to export .inp by v.addForce(filename, suGlobalState::gOnly().load_face_list)
+			std::string strExportFile = nanogui::file_dialog(
+			{ { "inp", "Abquas input model" } }, true);
+			if (!strExportFile.empty())
+			{			
+				v.addForce(strExportFile, suGlobalState::gOnly().load_face_list);
+			}
+
 			std::cout << suGlobalState::gOnly().load_face_list.size() << std::endl;
 		});
 		ngui->addButton("Add Constraint", [&] {
@@ -329,7 +336,9 @@ void suMeshViewer::build_UI()
 		ngui->addVariable("MC threshold", fThresholdMC);
 		ngui->addButton("Evolution", [&]()
 		{
-			//todo: check 3rd engine 
+			std::cout << "Evolution canceled in this version..." << std::endl;
+			return;
+			//todo: check 3rd engine 			
 			std::cout << "Begin evolution..." << std::endl;
 			envolution();
 		});
