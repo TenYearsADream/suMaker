@@ -17,6 +17,8 @@
 #include <igl/viewer/ViewerData.h>
 #include <resources.h>
 #include <suSkeleton.h>
+#include <common/common.h>
+#include <ui/variabledialog.h>
 
 using namespace std;
 suMeshViewer::suMeshViewer() : bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
@@ -30,39 +32,7 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 	progress("Read mesh", 0);
 	OpenMesh::IO::read_mesh(mesh_, filename);
 	progress("Read mesh", 100);
-
-	//convert obj from openmesh to eigen
-	suMesh::ConstVertexIter  v_it(mesh_.vertices_begin()), v_end(mesh_.vertices_end());
-
-	suMesh::Point p;
-	Eigen::DenseIndex rows = mesh_.n_vertices();
-	V.resize(rows, 3);
-	rows = mesh_.n_faces();
-	F.resize(rows, 3);
-
-	progress("Add vertices", 101);
-	//add vertices
-	for (; v_it != v_end; ++v_it)
-	{
-		p = mesh_.point(v_it);
-		V.row(v_it->idx()) << p[0], p[1], p[2];
-	}
-	//add face vertice 
-	progress("Add face vertice", 150);
-	suMesh::ConstFaceIter f_it(mesh_.faces_begin()), f_end(mesh_.faces_end());
-	int idxFace = 0;
-	for (; f_it != f_end; f_it++)
-	{
-		suMesh::FaceVertexIter fv_it = mesh_.fv_begin(f_it.handle());
-		suMesh::FaceVertexIter fv_end = mesh_.fv_end(f_it.handle());
-
-		int idxFv = 0;  //vertex index on a face
-		for (; fv_it != fv_end; ++fv_it)
-		{
-			F(idxFace, idxFv++) = fv_it.handle().idx();
-		}
-		idxFace++;
-	}
+	convert_openmesh_to_Eigen(mesh_, V, F);
 	progress("Get bounding box", 200);
 	//get bounding box
 	Eigen::Vector3d m = V.colwise().minCoeff();
@@ -325,11 +295,15 @@ void suMeshViewer::build_UI()
 
 			std::cout << suGlobalState::gOnly().load_face_list.size() << std::endl;
 		});
-		ngui->addButton("Add Constraint", [&] {
+		 ngui->addButton("Add Constraint", [&] {
 			if (!bSelect_Mode) return;
 			suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
 			//todo::add dialog to export .inp by v.addBoundary(filename, suGlobalState::gOnly().boundary_face_list)
 			std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
+			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
+				"Title", "This is an information message");
+			
+					
 		});
 		//Optimizaton
 		ngui->addGroup("Structure Evolution");
@@ -880,6 +854,9 @@ void suMeshViewer::set_select_mode(bool bSet)
 				viewer.data.set_colors(C);	
 				C.row(fid) = ori_color;
 				return true;
+			}
+			else {
+				viewer.data.set_colors(C);
 			}
 			
 			return false;

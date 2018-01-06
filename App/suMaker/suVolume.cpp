@@ -945,7 +945,7 @@ namespace SU {
 		std::vector<OctNode*>::iterator it = leafBoundaryNodes_.begin();
 		for (; it != leafBoundaryNodes_.end(); ++it) {
 
-			//convert handle to id
+			//convert face handle to id
 			std::vector<int> faceid_list;
 			std::vector<OpenMesh::FaceHandle>::iterator f_it = (*it)->suNode_.FaceVector.begin();
 			for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
@@ -998,6 +998,7 @@ namespace SU {
 
 	bool suVolume::addBoundary(std::string filename, std::vector<int> face_list_fix)
 	{
+
 		return false;
 	}
 
