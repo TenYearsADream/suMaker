@@ -840,7 +840,10 @@ namespace SU {
 	* Only nodes and elements are saved.
 	* Add element_id to each OctNode
 	************************************/
-	bool suVolume::saveBaseInp(std::string filename)
+	bool suVolume::saveBaseInp(std::string filename, 
+		std::vector<int> &face_list_force,
+		float force_value,
+		std::vector<int> &face_list_constraint)
 	{
 		if (leafBoundaryNodes_.empty()) return false;
 
@@ -849,6 +852,8 @@ namespace SU {
 		};
 		std::vector<_Element> _elements;
 		std::vector<SU::Point> _nodes;
+		std::set<int> _nodes_load;
+		std::set<int> _nodes_constraints;
 		CmpVec comp(FLT_MIN);               
 		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;  
 
@@ -894,8 +899,44 @@ namespace SU {
 			}
 		};
 
+		auto gen_force_nodes = [&](std::vector<int> &face_list_force) {
+			std::map<int, int> force_elements;
+
+			std::vector<OctNode*>::iterator it = leafBoundaryNodes_.begin();
+			for (; it != leafBoundaryNodes_.end(); ++it) {
+
+				//convert face handle to id
+				std::vector<int> faceid_list;
+				std::vector<OpenMesh::FaceHandle>::iterator f_it = (*it)->suNode_.FaceVector.begin();
+				for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
+					faceid_list.push_back(f_it->idx());
+				}
+				//if selected oct node
+				for (int i = 0; i < face_list_force.size(); i++) {
+					if (std::find(faceid_list.begin(),
+						faceid_list.end(),
+						face_list_force[i]) != faceid_list.end()) {
+						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
+					}
+				}	
+			}
+
+			//get load nodes(point) from load elments
+			int ii = 0;
+			for (std::map<int, int>::iterator it = force_elements.begin();
+				it != force_elements.end(); ++it) {
+				
+				int _eid = it->first;
+				for (int i = 0; i < 8; i++) {
+					int _nid = _elements[_eid].node_index[i];
+					_nodes_load.insert(_nid);
+				}
+			}
+		};
+
 		gen_element(leafInternalNodes_);
 		gen_element(leafBoundaryNodes_);
+		gen_force_nodes(face_list_force);
 		
 		std::stringbuf strInp;
 		std::ofstream inpFile;
@@ -926,11 +967,42 @@ namespace SU {
 		}
 		inpFile << os.str();
 		
-		inpFile.close();
+		//clear string stream
+		os.str(std::string());
+		os.clear();
+
+		//write force related
+		os << std::endl;
+		os << "*NSET, NSET = FemLoadFixed" << std::endl;
+
+		int ii = 0;
+		for (std::set<int>::iterator it = _nodes_load.begin();
+			it != _nodes_load.end(); ++it) {
+			os << *it << ", ";
+			if (++ii % 6 == 0) os << std::endl;
+		}
+		os << std::endl;
+
+		os << "***********************************************************" << std::endl;
+		os << "** One step is needed to calculate the mechanical analysis of FreeCAD" << std::endl;
+		os << "** loads are applied quasi - static, means without involving the time dimension" << std::endl;
+		os << "** written by write_step_begin function" << std::endl;
+		os << "*STEP" << std::endl;
+		os << "*STATIC" << std::endl;
+
+		os << "***********************************************************" << std::endl;
+		os << "** Node loads" << std::endl;
+		os << "** written by addForce function" << std::endl;
+		os << "*CLOAD" << std::endl;
+		os << "** FemLoadFixed" << std::endl;
+		os << "** node loads on element Face : Box:Face6" << std::endl;
+		os << "FemLoadFixed, 2, " << force_value <<std::endl;
+		inpFile << os.str() << std::endl;
 
 		os.str(std::string());
 		os.clear();
 
+		inpFile.close();
 		return false;
 	}
 

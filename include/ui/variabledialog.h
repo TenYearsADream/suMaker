@@ -1,5 +1,6 @@
 /*
-    nanogui/messagedialog.h -- Simple "OK" or "Yes/No"-style modal dialogs
+    A Simple variable setting modal dialogs modifed by messagedialog
+	This dialog is written by Yuan Yao<fly2mars@gmail.com>
 
     NanoGUI was developed by Wenzel Jakob <wenzel@inf.ethz.ch>.
     The widget drawing code is based on the NanoVG demo application
@@ -23,19 +24,23 @@ public:
         Warning
     };
 
-	VariableDialog(Widget *parent, Type type, const std::string &title = "Untitled",
+	VariableDialog(Widget *parent, Type type, 
+		          const std::string & unit="",
+		          const std::string &title = "Untitled",
                   const std::string &message = "Message",
                   const std::string &buttonText = "OK",
-                  const std::string &altButtonText = "Cancel", bool altButton = false);
+                  const std::string &altButtonText = "Cancel", 
+		          bool altButton = false);
 
     Label *messageLabel() { return mMessageLabel; }
     const Label *messageLabel() const { return mMessageLabel; }
-
-    std::function<void(int)> callback() const { return mCallback; }
-    void setCallback(const std::function<void(int)> &callback) { mCallback = callback; }
+	
+    std::function<void(float)> callback() const { return mCallback; }
+    void setCallback(const std::function<void(float)> &callback) { mCallback = callback; }
 protected:
-    std::function<void(int)> mCallback;
+    std::function<void(float)> mCallback;
     Label *mMessageLabel;
+	ref<TextBox> mTextBox;
 };
 
 NAMESPACE_END(nanogui)

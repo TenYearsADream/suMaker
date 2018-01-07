@@ -42,24 +42,7 @@ public:
 	//Data functions
 	void add_octree();
 	void add_bounding_box();
-	void envolution();
-	void init(std::vector<SU::OctNode>&);
-	void envolution(std::vector<SU::OctNode>&);
-	void caCut(std::vector<SU::OctNode>&);
-	void outOofemFile(std::vector <SU::OctNode>&);
-	void outForcedOofemFile(std::vector <SU::OctNode>&);
-	void outAbaqusFile(std::vector < SU::OctNode>&);
-	void outAbaquscoor(float max_x, float max_y, float max_z, int level);
-	void read_point_information(std::string address);
-	void read_point_coor(std::string address, float box_maxx, float box_maxy, float box_maxz, int box_level);
-	void ass_point();
-	void coorForcedOutput(float max_x, float max_y, float max_z, int level);//三个包装盒的尺寸  分割次数
-	void coor1(float max_x, float max_y, float max_z, int level);
-	void assignment(std::vector<SU::OctNode>&);
-	float return_max_strain(int morton_code, int level);
-	void agentCut(std::vector<SU::OctNode>&);
-
-	void outStlFile(std::vector<SU::OctNode> &stlVector);
+	
 	bool export_stl_with_metaball(const char* fileName, std::vector<SU::OctNode> &stlVector);    //根据表面体素生成元球模型
 	bool export_inp(std::string fileName);
 	
