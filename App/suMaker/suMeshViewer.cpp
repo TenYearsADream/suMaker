@@ -285,6 +285,7 @@ void suMeshViewer::build_UI()
 
 		ngui->addButton("Add Force", [&] {
 			if (!bSelect_Mode) return;
+			if (suGlobalState::gOnly().selected_face_list.empty()) return;
 			suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
 			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
 				"N",
@@ -302,7 +303,9 @@ void suMeshViewer::build_UI()
 		});
 		 ngui->addButton("Add Constraint", [&] {
 			if (!bSelect_Mode) return;
+			if (suGlobalState::gOnly().selected_face_list.empty()) return;
 			suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
+			
 			std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
 			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Information, 
 				"", //none unit 
@@ -594,7 +597,7 @@ void suMeshViewer::set_select_mode(bool bSet)
 		//set select model
 		C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
 		
-		
+		//add and remove mouse callback
 		callback_mouse_move =
 			[&](igl::viewer::Viewer& viewer, int x, int y)->bool
 		{	
@@ -653,6 +656,21 @@ void suMeshViewer::set_select_mode(bool bSet)
 			
 			return false;
 		};
+
+		//add key_down
+		callback_key_down =
+			[&](igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
+		{
+			if (key == 'e') {				
+				if (suGlobalState::gOnly().selected_face_list.empty()) return false;
+				//doto: extend selection
+				//extend_selection_faces_by_normal(
+				//suGlobalState::gOnly().selected_face_list.empty()
+				//);
+				
+			}
+			return false;
+		};
 	}
 	else {
 		
@@ -665,6 +683,11 @@ void suMeshViewer::set_select_mode(bool bSet)
 		};
 		callback_mouse_down =
 			[&](igl::viewer::Viewer& viewer, int, int)->bool
+		{
+			return false;
+		};
+		callback_key_down = 
+			[&](igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
 		{
 			return false;
 		};
