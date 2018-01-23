@@ -96,6 +96,13 @@ namespace SU {
 			pRoot_->min_.y = bbMin_[1];
 			pRoot_->min_.z = bbMin_[2];
 
+			//regulate bbox to a cube
+			SU::Point sz_bbox = pRoot_->max_ - pRoot_->min_;
+			float max_ax = max(max(sz_bbox.x, sz_bbox.y), sz_bbox.z);
+			pRoot_->max_.x = bbMin_[0] + max_ax;
+			pRoot_->max_.y = bbMin_[1] + max_ax;
+			pRoot_->max_.z = bbMin_[2] + max_ax;
+
 			///add face handle to node
 			for (; f_it != f_end; ++f_it)
 			{
