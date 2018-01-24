@@ -130,7 +130,7 @@ namespace SU {
 
 			//4.subdivide all node
 
-			
+
 			//5.foodfill
 			floodFill();
 
@@ -170,7 +170,7 @@ namespace SU {
 			float maxy = (yLocCode > 0) ? pParent->max_.y : (pParent->min_.y + halfLen.y);
 			float maxz = (zLocCode > 0) ? pParent->max_.z : (pParent->min_.z + halfLen.z);
 
-			
+
 			Point newMin = Point(minx, miny, minz);
 			Point newMax = Point(maxx, maxy, maxz);
 
@@ -180,25 +180,31 @@ namespace SU {
 			pParent->children_[i]->xLocCode_ = (xLocCode << pParent->level_ + 1) | pParent->xLocCode_;
 			pParent->children_[i]->yLocCode_ = (yLocCode << pParent->level_ + 1) | pParent->yLocCode_;
 			pParent->children_[i]->zLocCode_ = (zLocCode << pParent->level_ + 1) | pParent->zLocCode_;
-		}		
+		}
 
 		//Label boundary & add faces to node	
 		double triverts[3][3];
 		double boxCenter[3];
 		double boxHalfSize[3];
 
+		delta = pParent->children_[0]->max_ - pParent->children_[0]->min_;
+		halfLen = delta * 0.5f;
+		boxHalfSize[0] = halfLen.x;
+		boxHalfSize[1] = halfLen.y;
+		boxHalfSize[2] = halfLen.z;
+
 		for (int i = 0; i < 8; i++)
 		{
-			delta = pParent->children_[i]->max_ - pParent->children_[i]->min_;
-			halfLen = delta * 0.5f;
+			/*delta = pParent->children_[i]->max_ - pParent->children_[i]->min_;
+			halfLen = delta * 0.5f;*/
 			mid = pParent->children_[i]->min_ + halfLen;
 
 			boxCenter[0] = mid.x;
 			boxCenter[1] = mid.y;
 			boxCenter[2] = mid.z;
-			boxHalfSize[0] = halfLen.x;
+			/*boxHalfSize[0] = halfLen.x;
 			boxHalfSize[1] = halfLen.y;
-			boxHalfSize[2] = halfLen.z;
+			boxHalfSize[2] = halfLen.z;*/
 
 			//Labeling boundary by faces
 			size_t nFaces = pParent->suNode_.FaceVector.size();
@@ -215,7 +221,9 @@ namespace SU {
 					triverts[j][1] = point[1];
 					triverts[j][2] = point[2];
 				}
-
+				if (fHandle.idx() == 2094) {
+					std::cout << fHandle.idx << std::endl;
+				}
 				if (triBoxOverlap(boxCenter, boxHalfSize, triverts))
 				{
 					pParent->children_[i]->suNode_.AddElement(fHandle);
@@ -243,7 +251,7 @@ namespace SU {
 
 	void suVolume::transverse(OctNode * pNode, Callback * cb)
 	{
-		
+
 	}
 
 	/*\brief 这个函数用于继续划分当前的节点，例如一些位于内部的节点，使其划分到与其它叶节点同样的尺寸，并进行标记
@@ -256,14 +264,14 @@ namespace SU {
 	 */
 	void suVolume::patitionToLevel(OctNode * pNode, int nLevel, SU::NODE_LABEL label, std::vector<OctNode*> &nodeArr)
 	{
-		if (pNode->level_ >= nLevel || 
-			pNode->children_[0] != 0 )    //has been partitioned, not a leafnode.
+		if (pNode->level_ >= nLevel ||
+			pNode->children_[0] != 0)    //has been partitioned, not a leafnode.
 			return;
 
 		//partition each boundary node
 		Point delta = pNode->max_ - pNode->min_;
 		Point halfLen = delta * 0.5f;
-		Point mid = halfLen + pNode->min_;		
+		Point mid = halfLen + pNode->min_;
 
 		///new sub oct node
 		for (int i = 0; i < 8; i++)
@@ -298,7 +306,7 @@ namespace SU {
 			pNode->children_[i]->yLocCode_ = (yLocCode << pNode->level_ + 1) | pNode->yLocCode_;
 			pNode->children_[i]->zLocCode_ = (zLocCode << pNode->level_ + 1) | pNode->zLocCode_;
 		}
-				
+
 		if (pNode->children_[0]->level_ == nLevel)
 		{
 			//has been partitioned  to nLevel
@@ -319,7 +327,7 @@ namespace SU {
 				}
 			}
 		}
-		
+
 		return;
 	}
 
@@ -332,9 +340,9 @@ namespace SU {
 			{
 				for (int j = 0; j < N; j++)
 				{
-					if (neighbors[j]->label_ == UNDEFINE_CELL 
+					if (neighbors[j]->label_ == UNDEFINE_CELL
 						//&& neighbors[j]->level_ == level_ //only for leaf voxels
-						) 
+						)
 					{
 						neighbors[j]->label_ = labelNode(neighbors[j]);
 						//neighbors[j]->label_ = INTERIOR_CELL;
@@ -847,7 +855,7 @@ namespace SU {
 	* Only nodes and elements are saved.
 	* Add element_id to each OctNode
 	************************************/
-	bool suVolume::saveBaseInp(std::string filename, 
+	bool suVolume::saveBaseInp(std::string filename,
 		std::vector<int> &face_list_force,
 		float force_value,
 		std::vector<int> &face_list_constraint)
@@ -861,14 +869,14 @@ namespace SU {
 		std::vector<SU::Point> _nodes;
 		std::set<int> _nodes_load;
 		std::set<int> _nodes_constraints;
-		CmpVec comp(FLT_MIN);               
-		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;  
+		CmpVec comp(FLT_MIN);
+		std::map<SU::Point, unsigned int, CmpVec> _nodeMap;
 
 		// define a lambda function to satisfy
 		// 1. add element_id to original leafBoundaryNodes_ and leafInternalNodes_
 		// 2. ensure the uniqueness of the nodes and elements 
 		auto gen_element = [&](std::vector<SU::OctNode*> &oct_nodes) {
-			
+
 			std::vector<SU::OctNode*>::iterator it = oct_nodes.begin();
 
 			while (it != oct_nodes.end())
@@ -925,14 +933,14 @@ namespace SU {
 						face_list_force[i]) != faceid_list.end()) {
 						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
 					}
-				}	
+				}
 			}
 
 			//get load nodes(point) from load elments
 			int ii = 0;
 			for (std::map<int, int>::iterator it = force_elements.begin();
 				it != force_elements.end(); ++it) {
-				
+
 				int _eid = it->first;
 				for (int i = 0; i < 8; i++) {
 					int _nid = _elements[_eid].node_index[i];
@@ -944,7 +952,7 @@ namespace SU {
 		gen_element(leafInternalNodes_);
 		gen_element(leafBoundaryNodes_);
 		gen_force_nodes(face_list_force);
-		
+
 		std::stringbuf strInp;
 		std::ofstream inpFile;
 		inpFile.open(filename, std::ios::out);
@@ -954,7 +962,7 @@ namespace SU {
 		inpFile << "* * Generated by : suDesigner" << std::endl;
 		inpFile << "*Preprint, echo = NO, model = NO, history = NO, contact = NO" << std::endl;
 		inpFile << "*Node, NSET = Nall" << std::endl;
-	    // write nodes
+		// write nodes
 		std::stringstream os;
 		for (unsigned int i = 0; i < _nodes.size(); i++) {
 			os << i + 1 << ",  " << _nodes[i].x << ",   " << _nodes[i].y << ",   " << _nodes[i].z << std::endl;
@@ -968,12 +976,12 @@ namespace SU {
 		for (unsigned int i = 0; i < _elements.size(); i++) {
 			os << i + 1 << ",  ";
 			for (int j = 0; j < 7; j++) {
-				os << _elements[i].node_index[j] << ",   "; 
+				os << _elements[i].node_index[j] << ",   ";
 			}
 			os << _elements[i].node_index[7] << std::endl;
 		}
 		inpFile << os.str();
-		
+
 		//clear string stream
 		os.str(std::string());
 		os.clear();
@@ -1003,7 +1011,7 @@ namespace SU {
 		os << "*CLOAD" << std::endl;
 		os << "** FemLoadFixed" << std::endl;
 		os << "** node loads on element Face : Box:Face6" << std::endl;
-		os << "FemLoadFixed, 2, " << force_value <<std::endl;
+		os << "FemLoadFixed, 2, " << force_value << std::endl;
 		inpFile << os.str() << std::endl;
 
 		os.str(std::string());
@@ -1030,14 +1038,14 @@ namespace SU {
 			for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
 				faceid_list.push_back(f_it->idx());
 			}
-		    //if selected node
+			//if selected node
 			for (int i = 0; i < face_list_force.size(); i++) {
 				if (std::find(faceid_list.begin(),
 					faceid_list.end(),
 					face_list_force[i]) != faceid_list.end()) {
 					force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
 				}
-			}			
+			}
 		}
 
 		std::ofstream inpFile;
@@ -1045,12 +1053,12 @@ namespace SU {
 		std::stringstream os;
 
 		os << "*NSET, NSET = FemLoadFixed" << std::endl;
-				
+
 
 		int ii = 0;
 		for (std::map<int, int>::iterator it = force_elements.begin();
 			it != force_elements.end(); ++it) {
-			os <<  it->first << ", " ;
+			os << it->first << ", ";
 			if (++ii % 6 == 0) os << std::endl;
 		}
 		os << std::endl;
@@ -1071,7 +1079,7 @@ namespace SU {
 		os << "FemLoadFixed, 2, 100" << std::endl;
 		inpFile << os.str() << std::endl;
 
-		
+
 		return false;
 	}
 

@@ -4,6 +4,7 @@
 
 
 namespace SU{
+	/* Point is a simple 3D point object*/
 	struct Point
 	{
 		float x;

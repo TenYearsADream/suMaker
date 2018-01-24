@@ -476,8 +476,11 @@ void suMeshViewer::add_octree()
 	v.LoadMeshFromMesh(mesh_);
 	v.PartitionSpace(nDeep_);
 
-	std::vector<SU::OctNode*> nodeArr_ = v.leafInternalNodes_;
+	//test: only adding boundary nodes to check if there's fault.
+	std::vector<SU::OctNode*> nodeArr_;
+	/*= v.leafInternalNodes_;
 	std::cout << "internal node: " << v.leafInternalNodes_.size() << std::endl;
+	*/
 	//for test
 	nodeArr_.insert(nodeArr_.end(), v.leafBoundaryNodes_.begin(), v.leafBoundaryNodes_.end());
 	std::cout << "boundary node: " << v.leafBoundaryNodes_.size() << std::endl;
@@ -769,8 +772,6 @@ bool suMeshViewer::export_stl_with_metaball(const char* fileName, std::vector<SU
 			std::cout << "position = " << cP.x << ", " << cP.y << ", " << cP.z << std::endl;
 			m.position << cP.x, cP.y, cP.z;
 			m.squaredRadius = pow(volume_size / 2, 2);     //  metaball.r^2 = (volume box size / 2)^2
-			/*std::cout << "r^2 = " << m.squaredRadius << std::endl;
-			*/
 
 			mballs.push_back(m);
 		}
