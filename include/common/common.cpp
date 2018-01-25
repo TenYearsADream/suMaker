@@ -31,3 +31,56 @@ bool convert_openmesh_to_Eigen(suMesh &ms, Eigen::MatrixXd &V, Eigen::MatrixXi &
 	} 
 	return true;
 }
+
+void generate_adjacent_vertexes_by_vertex(
+	const Eigen::MatrixXi &F,
+	const Eigen::MatrixXd &V,
+	std::vector<std::set<Eigen::DenseIndex>>& A)
+{
+	Eigen::DenseIndex N = F.rows();
+	Eigen::DenseIndex M = V.rows();
+	A.resize(M);
+	for (Eigen::DenseIndex i = 0; i < N; i++) {
+		for (int j = 0; j < 3; j++) {
+			//add relations: F(i,1) F(i,2) to F(i,0) ... 
+			int v1_idx = (j + 1) % 3;
+			int v2_idx = (j + 2) % 3;
+			A[F(i, j)].insert(F(i,v1_idx) );
+			A[F(i, j)].insert(F(i, v2_idx) );
+		}
+		
+	}
+}
+
+void generate_adjacent_faces_by_vertex(const Eigen::MatrixXi & F, 
+	const Eigen::MatrixXd & V, 
+	std::vector<std::set<Eigen::DenseIndex>>& A)
+{
+	Eigen::DenseIndex N = F.rows();
+	Eigen::DenseIndex M = V.rows();
+	A.resize(M);
+	for (Eigen::DenseIndex i = 0; i < N; i++) {
+		for (int j = 0; j < 3; j++) {
+			//add relation: F(i) each vertex of F(i) 
+			A[F(i, j)].insert(i);
+		}
+	}
+}
+
+void generate_adjacent_faces_by_face(Eigen::MatrixXi & F, 
+	std::vector<std::set<Eigen::DenseIndex>>& AVV, 
+	std::vector<std::set<Eigen::DenseIndex>>& AVF, 
+	int indexF, 
+	std::set<Eigen::DenseIndex>& A)
+{
+	A.clear();
+	for (int i = 0; i < 3; i++) {
+		Eigen::DenseIndex j = F(indexF, i);
+		std::set<Eigen::DenseIndex>::iterator it = AVV[j].begin();
+		for (; it != AVV[j].end(); it++) {
+			A.insert(AVV[(*it)].begin(), AVV[(*it)].end());
+		}	
+	}
+}
+
+

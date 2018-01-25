@@ -33,6 +33,8 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 	OpenMesh::IO::read_mesh(mesh_, filename);
 	progress("Read mesh", 100);
 	convert_openmesh_to_Eigen(mesh_, V, F);
+	generate_adjacent_vertexes_by_vertex(F, V, AVV);
+	generate_adjacent_faces_by_vertex(F, V, AVF);
 	progress("Get bounding box", 200);
 	//get bounding box
 	Eigen::Vector3d m = V.colwise().minCoeff();

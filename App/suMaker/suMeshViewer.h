@@ -56,6 +56,9 @@ public:
 	Eigen::MatrixXd C;
 	Eigen::MatrixXd bbox;
 	Eigen::MatrixXd octreeLeafNodeBox;    //leaf node box for draw
+
+	std::vector<std::set<Eigen::DenseIndex>> AVV;  //adjacent verts list
+	std::vector<std::set<Eigen::DenseIndex>> AVF;  //adjacent faces list
 	std::vector<point_mises_strain> sort_vector;
 	struct CrossSectionOption { int nAxis; float fPos; int imgId; };
 
