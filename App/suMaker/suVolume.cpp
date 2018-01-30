@@ -221,9 +221,9 @@ namespace SU {
 					triverts[j][1] = point[1];
 					triverts[j][2] = point[2];
 				}
-				if (fHandle.idx() == 2094) {
+				/*if (fHandle.idx() == 2094) {
 					std::cout << fHandle.idx << std::endl;
-				}
+				}*/
 				if (triBoxOverlap(boxCenter, boxHalfSize, triverts))
 				{
 					pParent->children_[i]->suNode_.AddElement(fHandle);

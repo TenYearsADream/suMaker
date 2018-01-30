@@ -38,14 +38,22 @@ suGlobalState & suGlobalState::gOnly()
 
 void suGlobalState::release()
 {
+	clear();
 	delete p_gOnly;
-	p_gOnly = 0;
+	p_gOnly = 0;	
 }
 
 
 
 void suGlobalState::clear()
 {
+	selected_face_list.clear();
+	boundary_face_list.clear();
+	load_face_list.clear();
+	forcedPoint.clear();
+	globalEnvoMorton.clear();
+	//bSelect_Mode = false;
+
 	if (!pData_) delete pData_;
 }
 
@@ -167,6 +175,7 @@ unsigned char* suGlobalState::gen_cross_section_Z(float fPos)
 
 suGlobalState::suGlobalState() :p_volume(0)
 {
+	bSelect_Mode = false;
 	pData_ = new AppData();
 }
 

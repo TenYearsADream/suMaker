@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <suMesh.h>
+#include "plugin/plugin_extend_selection.h"
 
 /**
  * A framework for volume optimization
@@ -14,6 +15,10 @@ int main(int argc, char *argv[])
 	//else
 
 	suMeshViewer viewer;
+	//load plugins first
+	igl::viewer::plugin_extend_selection es;
+	viewer.plugins.push_back(&es);
+	//build UI
 	viewer.build_UI();
 
 	viewer.launch();

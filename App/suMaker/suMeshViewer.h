@@ -79,6 +79,8 @@ public:
 	
 
 	std::string cur_opened_mesh_filename;   
+	//UI control
+	bool bShowWindow2D;
 
 protected:
 	//UI related 
@@ -92,9 +94,7 @@ protected:
 	nanogui::ref<nanogui::ProgressBar> mProgressBar;
 	nanogui::ref<nanogui::Label>  mProgressLabel;
 
-	//UI control
-	bool bShowWindow2D;
-	bool bSelect_Mode;
+	
 
 private:	
 	suMesh mesh_;	

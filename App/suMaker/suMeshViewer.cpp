@@ -21,7 +21,7 @@
 #include <ui/variabledialog.h>
 
 using namespace std;
-suMeshViewer::suMeshViewer() : bSelect_Mode(false), nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
+suMeshViewer::suMeshViewer() : nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
 {
 	mFEABox = nullptr;
 
@@ -29,6 +29,7 @@ suMeshViewer::suMeshViewer() : bSelect_Mode(false), nDeep_(0), m_pCross_section_
 }
 void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progress)
 {
+	suGlobalState::gOnly().clear();
 	progress("Read mesh", 0);
 	OpenMesh::IO::read_mesh(mesh_, filename);
 	progress("Read mesh", 100);
@@ -281,12 +282,12 @@ void suMeshViewer::build_UI()
         ngui->addGroup("Force Setting");
 		//select model button
 		ngui->addButton("Select Mode", [&] {
-			bSelect_Mode = !bSelect_Mode;
-			set_select_mode(bSelect_Mode);
+			suGlobalState::gOnly().bSelect_Mode = !suGlobalState::gOnly().bSelect_Mode;
+			set_select_mode(suGlobalState::gOnly().bSelect_Mode);
 		});
 
 		ngui->addButton("Add Force", [&] {
-			if (!bSelect_Mode) return;
+			if (!suGlobalState::gOnly().bSelect_Mode) return;
 			if (suGlobalState::gOnly().selected_face_list.empty()) return;
 			suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
 			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
@@ -304,7 +305,7 @@ void suMeshViewer::build_UI()
 			});
 		});
 		 ngui->addButton("Add Constraint", [&] {
-			if (!bSelect_Mode) return;
+			if (!suGlobalState::gOnly().bSelect_Mode) return;
 			if (suGlobalState::gOnly().selected_face_list.empty()) return;
 			suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
 			
@@ -590,6 +591,13 @@ void suMeshViewer::add_bounding_box()
 
 void suMeshViewer::clear()
 {
+	AVV.clear();
+	AVF.clear();
+
+	data.uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
+		Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
+		Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+	
 
 	suGlobalState::gOnly().release();
 	if (!m_pCross_section_img) delete m_pCross_section_img;
@@ -662,20 +670,13 @@ void suMeshViewer::set_select_mode(bool bSet)
 			return false;
 		};
 
-		//add key_down
-		callback_key_down =
-			[&](igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
-		{
-			if (key == 'e') {				
-				if (suGlobalState::gOnly().selected_face_list.empty()) return false;
-				//doto: extend selection
-				//extend_selection_faces_by_normal(
-				//suGlobalState::gOnly().selected_face_list.empty()
-				//);
-				
-			}
-			return false;
-		};
+		////add key_down
+		//callback_key_down =
+		//	[&](igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
+		//{
+		//	
+		//	return false;
+		//};
 	}
 	else {
 		
@@ -691,11 +692,11 @@ void suMeshViewer::set_select_mode(bool bSet)
 		{
 			return false;
 		};
-		callback_key_down = 
+		/*callback_key_down = 
 			[&](igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
 		{
 			return false;
-		};
+		};*/
 	}
 }
 
