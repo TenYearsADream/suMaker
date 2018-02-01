@@ -176,9 +176,9 @@ namespace SU{
 		bool saveVTK(const char *pVTKFileName, int level = 3, const char *pVTKHead = "UnKnown Name",
 			float dx = 0, float dy = 0, float dz = 0);
 		bool saveBaseInp(std::string filename, 
-			std::vector<int> &face_list_force, 
+			std::set<int> &face_list_force, 
 			float force_value,
-			std::vector<int> &face_list_constraint);  //fill .inp file with nodes and elements
+			std::set<int> &face_list_constraint);  //fill .inp file with nodes and elements
 		bool addForce(std::string filename, std::vector<int> face_list_force);    //default force direction = face normal
 		bool addBoundary(std::string filename, std::vector<int> face_list_fix);   
 

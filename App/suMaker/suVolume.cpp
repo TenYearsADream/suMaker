@@ -852,13 +852,13 @@ namespace SU {
 
 	/************************************
 	* saveBaseInp
-	* Only nodes and elements are saved.
+	* 1. nodes and elements are saved.
 	* Add element_id to each OctNode
 	************************************/
 	bool suVolume::saveBaseInp(std::string filename,
-		std::vector<int> &face_list_force,
+		std::set<int> &face_list_force,
 		float force_value,
-		std::vector<int> &face_list_constraint)
+		std::set<int> &face_list_constraint)
 	{
 		if (leafBoundaryNodes_.empty()) return false;
 
@@ -914,25 +914,28 @@ namespace SU {
 			}
 		};
 
-		auto gen_force_nodes = [&](std::vector<int> &face_list_force) {
+		auto gen_force_nodes = [&](std::set<int> &face_list_force) {
 			std::map<int, int> force_elements;
 
 			std::vector<OctNode*>::iterator it = leafBoundaryNodes_.begin();
 			for (; it != leafBoundaryNodes_.end(); ++it) {
 
 				//convert face handle to id
-				std::vector<int> faceid_list;
+				std::set<int> faceid_list;
 				std::vector<OpenMesh::FaceHandle>::iterator f_it = (*it)->suNode_.FaceVector.begin();
 				for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
-					faceid_list.push_back(f_it->idx());
+					faceid_list.insert(f_it->idx());
 				}
 				//if selected oct node
-				for (int i = 0; i < face_list_force.size(); i++) {
-					if (std::find(faceid_list.begin(),
+				for (int i:face_list_force) {
+					if (faceid_list.count(i)) {
+						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
+					}
+					/*if (std::find(faceid_list.begin(),
 						faceid_list.end(),
 						face_list_force[i]) != faceid_list.end()) {
 						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
-					}
+					}*/
 				}
 			}
 

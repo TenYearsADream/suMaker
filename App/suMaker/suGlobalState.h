@@ -47,9 +47,9 @@ public:
 
 	//constraint setting
 	//only one force is supported now
-	std::vector<int> load_face_list;          //for load setting
-	std::vector<int> boundary_face_list;      //for freedom setting
-	std::vector<int> selected_face_list;      //list of selected face indexes
+	std::set<int> load_face_list;          //for load setting
+	std::set<int> boundary_face_list;      //for freedom setting
+	std::set<int> selected_face_list;      //list of selected face indexes
 	float force_value;   
 
 	//UI

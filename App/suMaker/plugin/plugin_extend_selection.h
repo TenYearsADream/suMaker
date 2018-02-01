@@ -22,7 +22,7 @@ namespace igl
 					//doto: extend selection
 					std::cout << "extend selected faces\n";
 					std::set<Eigen::DenseIndex> fids;
-					std::vector<int> &sFids = suGlobalState::gOnly().selected_face_list;
+					std::set<int> &sFids = suGlobalState::gOnly().selected_face_list;
 					for (auto i : sFids) {
 						generate_adjacent_faces_by_face(
 							static_cast<suMeshViewer*>(viewer)->F, 
@@ -33,6 +33,8 @@ namespace igl
 					for (auto i : fids) {
 						static_cast<suMeshViewer*>(viewer)->C.row(i) << 1, 0, 0;
 					}
+					// record fids
+
 
 				}
 			}

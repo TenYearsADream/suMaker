@@ -655,7 +655,7 @@ void suMeshViewer::set_select_mode(bool bSet)
 				if (button == static_cast<int>(MouseButton::Left)) {
 					// paint hit red
 					std::cout << fid << " is selected " << std::endl;
-					suGlobalState::gOnly().selected_face_list.push_back(fid);
+					suGlobalState::gOnly().selected_face_list.insert(fid);
 					C.row(fid) << 1, 0, 0;
 				}
 				else if (button == static_cast<int>(MouseButton::Right)) {
