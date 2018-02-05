@@ -50,6 +50,7 @@ public:
 	std::set<int> load_face_list;          //for load setting
 	std::set<int> boundary_face_list;      //for freedom setting
 	std::set<int> selected_face_list;      //list of selected face indexes
+	std::set<int> last_selected_face_list; //list of last selected indexes
 	float force_value;   
 
 	//UI

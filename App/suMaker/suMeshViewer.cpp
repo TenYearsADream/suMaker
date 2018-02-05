@@ -661,6 +661,7 @@ void suMeshViewer::set_select_mode(bool bSet)
 				else if (button == static_cast<int>(MouseButton::Right)) {
 					std::cout << " selected faces is cleared " << std::endl;
 					suGlobalState::gOnly().selected_face_list.clear();
+					suGlobalState::gOnly().last_selected_face_list.clear();
 					C = Eigen::MatrixXd::Constant(F.rows(), 3, 1);
 				}
 				return false;
