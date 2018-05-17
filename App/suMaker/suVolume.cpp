@@ -881,6 +881,11 @@ namespace SU {
 
 			while (it != oct_nodes.end())
 			{
+				if ((*it)->level_ != level_) {
+					it++;
+					continue;
+				}
+
 				SU::Point &m = (*it)->min_;
 				SU::Point &M = (*it)->max_;
 				_Element ele;
@@ -926,16 +931,13 @@ namespace SU {
 				for (; f_it != (*it)->suNode_.FaceVector.end(); ++f_it) {
 					faceid_list.insert(f_it->idx());
 				}
+				
 				//if selected oct node
 				for (int i:face_list_force) {
 					if (faceid_list.count(i)) {
-						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
-					}
-					/*if (std::find(faceid_list.begin(),
-						faceid_list.end(),
-						face_list_force[i]) != faceid_list.end()) {
-						force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
-					}*/
+						if((*it)->suNode_.element_id != -1)
+						   force_elements[(*it)->suNode_.element_id] = (*it)->suNode_.element_id;
+					}				
 				}
 			}
 
@@ -952,9 +954,10 @@ namespace SU {
 			}
 		};
 
-		gen_element(leafInternalNodes_);
+		
 		gen_element(leafBoundaryNodes_);
 		gen_force_nodes(face_list_force);
+		gen_element(leafInternalNodes_);
 
 		std::stringbuf strInp;
 		std::ofstream inpFile;

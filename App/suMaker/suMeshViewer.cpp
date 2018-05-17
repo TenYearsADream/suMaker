@@ -18,6 +18,7 @@
 #include <resources.h>
 #include <suSkeleton.h>
 #include <common/common.h>
+#include <common/stdfunc.h>
 #include <ui/variabledialog.h>
 
 using namespace std;
@@ -160,12 +161,10 @@ void suMeshViewer::build_UI()
 			std::make_pair(nvgImageIcon(ctx, loadmesh), ""));
 		mExampleImages.insert(mExampleImages.end(),
 			std::make_pair(nvgImageIcon(ctx, loadskeleton), ""));
-
-
 		panel->setImages(mExampleImages);
-		panel->setCallback([&, openBtn](int i) {
-			openBtn->setPushed(false);
 
+		panel->setCallback([&, openBtn](int i) {			
+			openBtn->setPushed(true);
 			//load mesh
 			if (i == 0) { 
 				std::string strOpenFile = nanogui::file_dialog(
@@ -197,6 +196,7 @@ void suMeshViewer::build_UI()
 				}
 
 			}
+			openBtn->setPushed(false);
 		});
 		ngui->mLayout->appendRow(0);
 		ngui->mLayout->setAnchor(openBtn, nanogui::AdvancedGridLayout::Anchor(1, ngui->mLayout->rowCount() - 1, 3, 1));
@@ -351,16 +351,21 @@ void suMeshViewer::build_UI()
 				std::cout << "Please set load conditions!" << std::endl;
 				return;
 			}
-			
-			exportBtn->setPushed(true);
-			std::string strExportFile = nanogui::file_dialog(
-			{ { "inp", "Abquas input model" }}, true);
-			if (!strExportFile.empty())
-			{
-				//Save voxilized model to mesh by metaball and MC;				
-				//export_stl_with_metaball(strSaveFile.c_str(), v.leafBoundaryNodes_);
-				export_inp(strExportFile);
+		
+			exportBtn->setPushed(false);
+			std::string strExportFile;
+			if (i == 0) {
+				strExportFile = nanogui::file_dialog(
+				{ { "inp", "Abquas input model" }}, true);
+				if (strExportFile.empty())
+				{
+					exportBtn->setPushed(false);
+					return;
+				}
+				if (SU::GetExtFileName(strExportFile) != "inp") 
+					strExportFile = strExportFile + ".inp";
 			}
+			save_mesh_to_file(strExportFile.c_str());
 			exportBtn->setPushed(false);
 		});
 		ngui->mLayout->appendRow(0);
@@ -462,7 +467,7 @@ void suMeshViewer::build_UI()
 		// Bind function
 		using namespace std::placeholders;
 		mProgress = std::bind(&suMeshViewer::showProgress, this, _1, _2);
-
+	
 		return false;
 	};
 

@@ -96,7 +96,7 @@ protected:
 
 	
 
-private:	
+public:	
 	suMesh mesh_;	
 	
 	std::vector<float> all_point_mises_strain;
