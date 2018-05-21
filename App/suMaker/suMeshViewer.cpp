@@ -279,42 +279,86 @@ void suMeshViewer::build_UI()
 		mFEABox->setId("OOFEM");
 		
 
-        ngui->addGroup("Force Setting");
+        ngui->addGroup("Boundary Conditions");
+		
 		//select model button
-		ngui->addButton("Select Mode", [&] {
+		nanogui::Button* pBtnSel = ngui->addButton("Select Mode", [&] {
 			suGlobalState::gOnly().bSelect_Mode = !suGlobalState::gOnly().bSelect_Mode;
 			set_select_mode(suGlobalState::gOnly().bSelect_Mode);
 		});
-
-		ngui->addButton("Add Force", [&] {
-			if (!suGlobalState::gOnly().bSelect_Mode) return;
-			if (suGlobalState::gOnly().selected_face_list.empty()) return;
-			suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
-			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
-				"N",
-				"Force Setting", 
-				"The force wiil be load on the selected faces. "
-				"The direction of force is on the face normal. "
-				"The force magnity is:",
-				"OK",
-				"Cancel", true);
-			//todo: record force direction
-			dlg->setCallback([&](float v) {
-				suGlobalState::gOnly().force_value = v;
-				std::cout << suGlobalState::gOnly().force_value << std::endl;
+		pBtnSel->setTooltip("Enter/Exit select mode,\nleft mouse button to slect surface,\n right mouse button to clear!");
+		//Force buttons
+		{
+			using namespace nanogui;
+			Widget *tools = new Widget(ngui->mWindow);
+			tools->setLayout(new BoxLayout(Orientation::Horizontal,
+				Alignment::Middle, 0, 6));
+		
+			Button *b = new Button(tools, "Add Force");
+			b->setCallback([&]() {
+				//add new force 
+				if (!suGlobalState::gOnly().bSelect_Mode) return;
+				if (suGlobalState::gOnly().selected_face_list.empty()) return;
+				suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
+				auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
+					"N",
+					"Force Setting",
+					"The force will be load on the selected faces. "
+					"The direction of force is on the face normal. "
+					"The force magnity is:",
+					"OK",
+					"Cancel", true);
+				//todo: record force direction
+				dlg->setCallback([&](float v) {
+					suGlobalState::gOnly().force_value = v;
+					std::cout << suGlobalState::gOnly().force_value << std::endl;
+				});
 			});
-		});
-		 ngui->addButton("Add Constraint", [&] {
-			if (!suGlobalState::gOnly().bSelect_Mode) return;
-			if (suGlobalState::gOnly().selected_face_list.empty()) return;
-			suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
 			
-			std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
-			auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Information, 
-				"", //none unit 
-				"Constraint setting", "Constraint is set!");
-					
-		});
+			b = new Button(tools, "Del Force");
+			b->setCallback([&]() {
+				//delete last force setting
+			});
+
+			if (ngui->mLayout->rowCount() > 0)
+				ngui->mLayout->appendRow(10);
+			ngui->mLayout->appendRow(0);
+			ngui->mLayout->setAnchor(tools, AdvancedGridLayout::Anchor(1, ngui->mLayout->rowCount() - 1, 3, 1));
+		}
+		
+		//Constraint buttons
+		{
+			using namespace nanogui;
+			Widget *tools = new Widget(ngui->mWindow);
+			tools->setLayout(new BoxLayout(Orientation::Horizontal,
+				Alignment::Middle, 0, 6));
+
+			Button *b = new Button(tools, "Add Const");
+			b->setCallback([&]() {
+				//new const
+				//get current constraint setting
+				//add constraint setting to condition
+				if (!suGlobalState::gOnly().bSelect_Mode) return;
+				if (suGlobalState::gOnly().selected_face_list.empty()) return;
+				suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
+
+				std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
+				auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Information,
+					"", //none unit 
+					"Constraint setting", "Constraint is set!");
+			});
+
+			b = new Button(tools, "Del Const");
+			b->setCallback([&]() {
+				//delete last constraint
+			});
+
+			if (ngui->mLayout->rowCount() > 0)
+				ngui->mLayout->appendRow(10);
+			ngui->mLayout->appendRow(0);
+			ngui->mLayout->setAnchor(tools, AdvancedGridLayout::Anchor(1, ngui->mLayout->rowCount() - 1, 3, 1));
+		}
+
 		//Optimizaton
 		ngui->addGroup("Structure Evolution");
 		ngui->addVariable("MC threshold", fThresholdMC);
@@ -818,25 +862,4 @@ bool suMeshViewer::export_stl_with_metaball(const char* fileName, std::vector<SU
 		SU::write_metaball_to_stl(fileName, /*samples*/mballs, fThresholdMC, resolution, bbox);
 
 	return true;
-}
-
-bool suMeshViewer::export_inp(std::string fileName)
-{
-	if (!v.isLoad_ || v.leafBoundaryNodes_.empty()) return false;
-
-	auto idx = fileName.find_last_of('.');
-	if (idx == std::string::npos ) {
-		fileName = fileName + ".inp";
-	}
-	else {
-		std::string ext = fileName.substr(idx);
-		if (ext != ".inp") fileName = fileName + ".inp";
-	}
-
-	return v.saveBaseInp(fileName, 
-		suGlobalState::gOnly().load_face_list,
-		suGlobalState::gOnly().force_value,
-		suGlobalState::gOnly().boundary_face_list
-		);
-
 }

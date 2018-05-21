@@ -44,9 +44,7 @@ public:
 	void add_bounding_box();
 	
 	bool export_stl_with_metaball(const char* fileName, std::vector<SU::OctNode> &stlVector);    //根据表面体素生成元球模型
-	bool export_inp(std::string fileName);
-	
-	
+		
 	void clear();
 
 public:
