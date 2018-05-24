@@ -52,6 +52,8 @@ void suGlobalState::clear()
 	load_face_list.clear();
 	forcedPoint.clear();
 	globalEnvoMorton.clear();
+	loadArr.clear();
+
 	//bSelect_Mode = false;
 
 	if (!pData_) delete pData_;
@@ -250,3 +252,36 @@ unsigned char * suGlobalState::envoluted_cross_section_X(float fPos,int level)
 	}
 	return (unsigned char*)pData_->p_cross_section_img->data;
 }
+
+void suGlobalState::add_load(std::set<int>& face_list, float mag, float * pNorm)
+{
+	force_setting fs;
+	fs.face_list = face_list;
+	fs.force_mag = mag;
+	fs.ori[0] = *(pNorm);
+	fs.ori[1] = *(pNorm+1);
+	fs.ori[2] = *(pNorm+2);
+	loadArr[loadArr.size()] = fs;
+}
+void suGlobalState::del_load()
+{
+	if (!loadArr.size()) return;
+	loadArr.erase(--loadArr.end());
+}
+
+void suGlobalState::add_constraint(std::set<int>& face_list, int nType)
+{
+	constraint_setting cs;
+	cs.face_list = face_list;
+	cs.type = nType;
+	constraintArr[constraintArr.size()] = cs;
+}
+
+void suGlobalState::del_constraint()
+{
+	if (!constraintArr.size()) return;
+	constraintArr.erase(--constraintArr.end());
+}
+
+
+

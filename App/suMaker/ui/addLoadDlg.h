@@ -13,10 +13,12 @@
 #pragma once
 
 #include <nanogui/window.h>
+#include <nanogui/textbox.h>
+#include <nanogui/checkbox.h>
 
 NAMESPACE_BEGIN(nanogui)
 
-class VariableDialog : public Window {
+class AddLoadDialog : public Window {
 public:
     enum class Type {
         Information,
@@ -24,7 +26,7 @@ public:
         Warning
     };
 
-	VariableDialog(Widget *parent, Type type, 
+	AddLoadDialog(Widget *parent, Type type, 
 		          const std::string & unit="",
 		          const std::string &title = "Untitled",
                   const std::string &message = "Message",
@@ -35,12 +37,15 @@ public:
     Label *messageLabel() { return mMessageLabel; }
     const Label *messageLabel() const { return mMessageLabel; }
 	
-    std::function<void(float)> callback() const { return mCallback; }
-    void setCallback(const std::function<void(float)> &callback) { mCallback = callback; }
+    std::function<void(float*)> callback() const { return mCallback; }
+    void setCallback(const std::function<void(float*)> &callback) { mCallback = callback; }
 protected:
-    std::function<void(float)> mCallback;
+    std::function<void(float*)> mCallback;
     Label *mMessageLabel;
 	ref<TextBox> mTextBox;
+	ref<CheckBox> mCheckBox[3];
+	enum{V_NUM=4};
+	float v[V_NUM];
 };
 
 NAMESPACE_END(nanogui)

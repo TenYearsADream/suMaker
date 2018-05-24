@@ -132,12 +132,12 @@ endif()
 FILE(GLOB SRC_SOURCES	App/${APP_NAME}/*.cpp App/${APP_NAME}/*.c 
                         include/common/*.cpp 
 						App/${APP_NAME}/plugin/*.cpp
-						include/ui/*.cpp
+						App/${APP_NAME}/ui/*.cpp
 						) 
 FILE(GLOB SRC_HEADERS	App/${APP_NAME}/*.h 
                         App/${APP_NAME}/*.hpp 
 						App/${APP_NAME}/plugin/*.h
-						include/ui/*.h
+						App/${APP_NAME}/ui/*.h
 						)
 set(SRC_LIST ${SRC_SOURCES} 
              ${SRC_HEADERS} 

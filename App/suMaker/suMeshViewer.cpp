@@ -19,7 +19,8 @@
 #include <suSkeleton.h>
 #include <common/common.h>
 #include <common/stdfunc.h>
-#include <ui/variabledialog.h>
+#include "ui/addLoadDlg.h"
+#include "ui/addConstraintDlg.h"
 
 using namespace std;
 suMeshViewer::suMeshViewer() : nDeep_(0), m_pCross_section_img(0), fThresholdMC(1)
@@ -300,24 +301,31 @@ void suMeshViewer::build_UI()
 				if (!suGlobalState::gOnly().bSelect_Mode) return;
 				if (suGlobalState::gOnly().selected_face_list.empty()) return;
 				suGlobalState::gOnly().load_face_list = suGlobalState::gOnly().selected_face_list;
-				auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Question,
+				auto dlg = new nanogui::AddLoadDialog(screen, AddLoadDialog::Type::Question,
 					"N",
-					"Force Setting",
+					"Add Load",
 					"The force will be load on the selected faces. "
 					"The direction of force is on the face normal. "
 					"The force magnity is:",
 					"OK",
 					"Cancel", true);
 				//todo: record force direction
-				dlg->setCallback([&](float v) {
-					suGlobalState::gOnly().force_value = v;
-					std::cout << suGlobalState::gOnly().force_value << std::endl;
+				dlg->setCallback([&](float *v ) {
+					//
+					float ori[3] = { v[1],v[2],v[3] };
+					suGlobalState::gOnly().add_load(
+						suGlobalState::gOnly().selected_face_list,
+						v[0],
+						ori
+						);					
+					
 				});
 			});
 			
 			b = new Button(tools, "Del Force");
 			b->setCallback([&]() {
 				//delete last force setting
+				suGlobalState::gOnly().del_load();
 			});
 
 			if (ngui->mLayout->rowCount() > 0)
@@ -343,14 +351,21 @@ void suMeshViewer::build_UI()
 				suGlobalState::gOnly().boundary_face_list = suGlobalState::gOnly().selected_face_list;
 
 				std::cout << suGlobalState::gOnly().boundary_face_list.size() << std::endl;
-				auto dlg = new nanogui::VariableDialog(screen, VariableDialog::Type::Information,
+				auto dlg = new nanogui::AddConstraintDialog(screen, AddConstraintDialog::Type::Information,
 					"", //none unit 
-					"Constraint setting", "Constraint is set!");
+					"Constraint setting", "Constraint is set!","OK",
+					"Cancel", true);
+				//todo: record force direction
+				dlg->setCallback([&](float *v) {
+					suGlobalState::gOnly().add_constraint(
+						suGlobalState::gOnly().selected_face_list, v[0]);
+				});
 			});
 
 			b = new Button(tools, "Del Const");
 			b->setCallback([&]() {
 				//delete last constraint
+				suGlobalState::gOnly().del_constraint();
 			});
 
 			if (ngui->mLayout->rowCount() > 0)
@@ -387,11 +402,11 @@ void suMeshViewer::build_UI()
 				std::cout << "Please make voxelization first!" << std::endl;
 				return;
 			}
-			if (suGlobalState::gOnly().boundary_face_list.empty()) {
+			if (suGlobalState::gOnly().loadArr.empty()) {
 				std::cout << "Please config boundary conditions!" << std::endl;
 				return;
 			}
-			if (suGlobalState::gOnly().load_face_list.empty()) {
+			if (suGlobalState::gOnly().constraintArr.empty()) {
 				std::cout << "Please set load conditions!" << std::endl;
 				return;
 			}
@@ -599,11 +614,8 @@ void suMeshViewer::add_octree()
 		it++;
 	}
 	data.set_edges(P_, E_, Eigen::RowVector3d(1, 0, 0));
-
-
-	std::cout << "Output: " << nodeArr_.size() << " nodes." << std::endl;
-
-
+	
+	std::cout << "Output: " << nodeArr_.size() << " nodes." << std::endl;	
 }
 
 

@@ -45,7 +45,7 @@ public:
 	//app config
 	//todo: add FEA engine info
 
-	//constraint setting
+	//boudary conditions setting
 	//only one force is supported now
 	std::set<int> load_face_list;          //for load setting
 	std::set<int> boundary_face_list;      //for freedom setting
@@ -53,6 +53,24 @@ public:
 	std::set<int> last_selected_face_list; //list of last selected indexes
 	float force_value;   
 
+	//multiple forces
+	class force_setting {
+	public:
+		std::set<int> face_list;
+		float force_mag;  //magnity
+		float ori[3];     //force direction
+	};
+	class constraint_setting {
+	public:
+		std::set<int> face_list;		
+		int type;     //constraint type: //0: ENCASTRE   1: PINNED	
+	};
+	std::map<int, force_setting> loadArr;
+	std::map<int, constraint_setting> constraintArr;
+	void add_load(std::set<int> &face_list, float mag, float *pNorm);
+	void del_load();   //erase last entry
+	void add_constraint(std::set<int> &face_list, int nType);
+	void del_constraint();
 	//UI
 	bool bSelect_Mode;
 private:

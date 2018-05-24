@@ -9,16 +9,16 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
-#include "variabledialog.h"
+#include "addConstraintDlg.h"
 #include <nanogui/layout.h>
 #include <nanogui/button.h>
 #include <nanogui/entypo.h>
 #include <nanogui/label.h>
-#include <nanogui/textbox.h>
+
 #include <iostream>
 
 NAMESPACE_BEGIN(nanogui)
-VariableDialog::VariableDialog(Widget * parent, Type type,
+AddConstraintDialog::AddConstraintDialog(Widget * parent, Type type,
 	          const std::string & unit,
 	          const std::string & title, 
 	          const std::string & message, 
@@ -26,6 +26,11 @@ VariableDialog::VariableDialog(Widget * parent, Type type,
 	          const std::string & altButtonText, 
 	          bool altButton) : Window(parent, title)
 {
+	//init value
+	for (int i = 0; i < V_NUM; i++) {
+		v[i] = 0;
+	}
+	//init UI
 	setLayout(new BoxLayout(Orientation::Vertical,
 		Alignment::Middle, 10, 10));
 	setModal(true);
@@ -43,17 +48,38 @@ VariableDialog::VariableDialog(Widget * parent, Type type,
 	iconLabel->setFontSize(50);
 	mMessageLabel = new Label(panel1, message);
 	mMessageLabel->setFixedWidth(200);
-	//variable Edit
-	if (!unit.empty()) {
-		mTextBox = new nanogui::TextBox(panel1->window());
-		mTextBox->setEditable(true);
-		mTextBox->setFixedSize(Vector2i(100, 20));
-		mTextBox->setValue("50");
-		mTextBox->setUnits(unit);
-		mTextBox->setDefaultValue("0.0");
-		mTextBox->setFontSize(16);
-		mTextBox->setFormat("[-]?[0-9]*\\.?[0-9]+");
+
+	//test
+	Widget *panel3 = new Widget(this);
+	GridLayout *layout =
+		new GridLayout(Orientation::Horizontal, 2,
+			Alignment::Middle, 15, 5);
+	layout->setColAlignment(
+	{ Alignment::Maximum, Alignment::Fill });
+	layout->setSpacing(0, 10);
+	panel3->setLayout(layout);
+	/* FP widget */ 
+	{
+		//variable Edit		
+		new Label(panel3, "type :", "sans-bold");
+		Widget *panelCheck = new Widget(panel3);
+		layout = new GridLayout(Orientation::Horizontal, 6,
+			Alignment::Middle, 5, 5);
+		layout->setColAlignment(
+		{ Alignment::Maximum, Alignment::Fill });
+		layout->setSpacing(0, 5);
+		panelCheck->setLayout(layout);
+		std::string sType[] = { "ENCASTRE", "PINNED"};
+		for (int i = 0; i < 2; i++) {
+			mCheckBox[i] = new CheckBox(panelCheck, sType[i]);
+			mCheckBox[i]->setFontSize(18);
+			mCheckBox[i]->setChecked(false);
+
+		}
+		
 	}
+	//test
+	
 	Widget *panel2 = new Widget(this);
 	panel2->setLayout(new BoxLayout(Orientation::Horizontal,
 		Alignment::Middle, 0, 15));
@@ -67,8 +93,19 @@ VariableDialog::VariableDialog(Widget * parent, Type type,
 	mCallback = nullptr;
 
 	button->setCallback([&] {
-		if (mCallback) {
-			float v = std::stof(mTextBox->value());
+		if (mCallback) {			
+			int nChecked = 0;
+			for (int i = 0; i < 2; i++) {
+				if (mCheckBox[i]->checked()) {
+					nChecked++;
+					v[0] = i;
+				}
+			}
+			if (nChecked != 1) {
+				mMessageLabel->setCaption("Error: Only one type can be choosed!");
+				return;
+			}
+			
 			mCallback(v);
 		}
 		dispose();
