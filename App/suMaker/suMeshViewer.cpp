@@ -34,9 +34,11 @@ void suMeshViewer::openMesh(std::string filename, const ProgressCallback &progre
 	suGlobalState::gOnly().clear();
 	progress("Read mesh", 0);
 	OpenMesh::IO::read_mesh(mesh_, filename);
-	progress("Read mesh", 100);
+	progress("Convert openmesh to matrix...", 100);
 	convert_openmesh_to_Eigen(mesh_, V, F);
+	progress("Generate adjacent vertex relationship...", 130);
 	generate_adjacent_vertexes_by_vertex(F, V, AVV);
+	progress("Generate adjacent faces relationship...", 160);
 	generate_adjacent_faces_by_vertex(F, V, AVF);
 	progress("Get bounding box", 200);
 	//get bounding box

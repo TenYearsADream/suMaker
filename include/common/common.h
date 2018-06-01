@@ -14,6 +14,11 @@ void generate_adjacent_faces_by_vertex(
 	const Eigen::MatrixXi &F,
 	const Eigen::MatrixXd &V,
 	std::vector<std::set<Eigen::DenseIndex> > &A);
+/**generate adjacent faces from current face
+* \param F: face matrix
+* \param AVV: not used
+* \param AVF: Adjacent face to face matrix
+*/
 void generate_adjacent_faces_by_face(
 	Eigen::MatrixXi &F,
 	std::vector<std::set<Eigen::DenseIndex> > &AVV,

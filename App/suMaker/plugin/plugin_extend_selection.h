@@ -33,13 +33,38 @@ namespace igl
 							static_cast<suMeshViewer*>(viewer)->AVF, i, fids);
 					}
 					// paint hit red
+					for (auto i : fids) {						
+						static_cast<suMeshViewer*>(viewer)->C.row(i) << 1, 0, 0;
+					}
+					sLastFids = sFids;
+					suGlobalState::gOnly().last_selected_face_list = suGlobalState::gOnly().selected_face_list;
+					suGlobalState::gOnly().selected_face_list.insert(fids.begin(), fids.end());									
+
+				}
+
+				// Propagation selection
+				if (key == 'P') {
+					if (suGlobalState::gOnly().selected_face_list.empty()) return false;
+					//doto: extend selection
+					std::cout << "running propagation selection\n";
+					std::set<Eigen::DenseIndex> fids;
+					std::set<int> &sFids = suGlobalState::gOnly().selected_face_list;
+					std::set<int> &sLastFids = suGlobalState::gOnly().last_selected_face_list;
+					for (auto i : sFids) {
+						if (sLastFids.count(i)) continue;
+
+						generate_adjacent_faces_by_face(
+							static_cast<suMeshViewer*>(viewer)->F,
+							static_cast<suMeshViewer*>(viewer)->AVV,
+							static_cast<suMeshViewer*>(viewer)->AVF, i, fids);
+					}
+					// paint hit red
 					for (auto i : fids) {
 						static_cast<suMeshViewer*>(viewer)->C.row(i) << 1, 0, 0;
 					}
 					sLastFids = sFids;
+					suGlobalState::gOnly().last_selected_face_list = suGlobalState::gOnly().selected_face_list;
 					suGlobalState::gOnly().selected_face_list.insert(fids.begin(), fids.end());
-					// record fids
-
 
 				}
 			}
